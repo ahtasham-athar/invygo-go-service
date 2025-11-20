@@ -23,11 +23,15 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/1cTC1lQRibMRmcVi4bT6nxHL
 const cacheTTL = time.Minute // 1 minute cache
 
 type Car struct {
-	Availability string
-	Year         int
-	Fee          string
-	BodyType     string
-	CarModel     string
+	Position         int    `json:"Position"`
+	SubscriptionType string `json:"Subscription Type"`
+	Availability     string `json:"Availability"`
+	Year             int    `json:"Year"`
+	CarModel         string `json:"Car Model"`
+	ContractDuration string `json:"Contract Duration"`
+	Mileage          string `json:"Mileage"`
+	Fee              string `json:"Fee"`
+	BodyType         string `json:"Body Type"`
 }
 
 type SearchRequest struct {
@@ -81,12 +85,17 @@ func loadCarsCSVFromReader(r io.Reader) ([]Car, error) {
 			continue // guard against short rows
 		}
 		year, _ := strconv.Atoi(row[3])
+		position, _ := strconv.Atoi(row[0])
 		cars = append(cars, Car{
-			Availability: row[2],
-			Year:         year,
-			Fee:          row[7],
-			BodyType:     row[8],
-			CarModel:     row[4],
+			Position:         position,
+			SubscriptionType: row[1],
+			Availability:     row[2],
+			Year:            year,
+			CarModel:        row[4],
+			ContractDuration: row[5],
+			Mileage:        row[6],
+			Fee:            row[7],
+			BodyType:      row[8],
 		})
 	}
 	return cars, nil
@@ -341,190 +350,3 @@ func main() {
 	log.Println("Go filter service running on :8080 (API key + CSV URL + cache)")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
-
-
-// package main
-
-// import (
-// 	"encoding/csv"
-// 	"encoding/json"
-// 	"log"
-// 	"net/http"
-// 	"os"
-// 	"regexp"
-// 	"strconv"
-// 	"strings"
-// )
-
-// const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20zz90"
-
-// type Car struct {
-// 	Availability string
-// 	Year         int
-// 	Fee          string
-// 	BodyType     string
-// 	CarModel     string
-// }
-
-// type SearchRequest struct {
-// 	CarModel string `json:"car_model"`
-// 	BodyType string `json:"body_type"`
-// 	MaxPrice string `json:"max_price"`
-// 	MinYear  string `json:"min_year"`
-// }
-
-// func cleanFee(fee string) float64 {
-// 	re := regexp.MustCompile(`[^\d.]`)
-// 	cleaned := re.ReplaceAllString(fee, "")
-// 	price, _ := strconv.ParseFloat(cleaned, 64)
-// 	return price
-// }
-
-// func min(a, b int) int {
-// 	if a < b {
-// 		return a
-// 	}
-// 	return b
-// }
-
-// func loadCarsCSV(path string) ([]Car, error) {
-// 	f, err := os.Open(path)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer f.Close()
-// 	r := csv.NewReader(f)
-// 	records, err := r.ReadAll()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	var cars []Car
-// 	for i, row := range records {
-// 		if i == 0 {
-// 			continue // skip header
-// 		}
-// 		year, _ := strconv.Atoi(row[3])
-// 		cars = append(cars, Car{
-// 			Availability: row[2],
-// 			Year:         year,
-// 			Fee:          row[7],
-// 			BodyType:     row[8],
-// 			CarModel:     row[4],
-// 		})
-// 	}
-// 	return cars, nil
-// }
-
-// func filterCars(req SearchRequest, cars []Car) ([]Car, string) {
-// 	minYear, _ := strconv.Atoi(req.MinYear)
-// 	maxPrice := cleanFee(req.MaxPrice)
-// 	bodyType := strings.ToLower(strings.TrimSpace(req.BodyType))
-// 	carModelInput := strings.ReplaceAll(strings.ToLower(strings.TrimSpace(req.CarModel)), " ", "")
-
-// 	available := []Car{}
-// 	for _, c := range cars {
-// 		if strings.ToLower(strings.TrimSpace(c.Availability)) == "available now" {
-// 			available = append(available, c)
-// 		}
-// 	}
-
-// 	var idealResults []Car
-// 	for _, car := range available {
-// 		carYear := car.Year
-// 		carPrice := cleanFee(car.Fee)
-// 		carBodyType := strings.ToLower(strings.TrimSpace(car.BodyType))
-// 		carModelFromDB := strings.ReplaceAll(strings.ToLower(car.CarModel), " ", "")
-// 		modelMatch := carModelInput == "" || strings.Contains(carModelFromDB, carModelInput)
-// 		bodyTypeMatch := bodyType == "" || carBodyType == bodyType
-// 		priceMatch := maxPrice <= 0 || carPrice <= maxPrice
-// 		yearMatch := minYear <= 1900 || carYear >= minYear
-// 		if modelMatch && bodyTypeMatch && priceMatch && yearMatch {
-// 			idealResults = append(idealResults, car)
-// 		}
-// 	}
-// 	if len(idealResults) > 0 {
-// 		return idealResults[:min(3, len(idealResults))], "Ideal Match Found"
-// 	}
-
-// 	// Flexible Model Match (Layer 2)
-// 	if carModelInput != "" {
-// 		var modelMatches []Car
-// 		for _, car := range available {
-// 			dbCarModel := strings.ReplaceAll(strings.ToLower(car.CarModel), " ", "")
-// 			if strings.Contains(dbCarModel, carModelInput) {
-// 				modelMatches = append(modelMatches, car)
-// 			}
-// 		}
-// 		if len(modelMatches) > 0 {
-// 			return modelMatches[:min(3, len(modelMatches))], "Flexible Model Match Found"
-// 		}
-// 	}
-
-// 	// Relaxed/Alternative Suggestions (Layer 3)
-// 	var relaxedResults []Car
-// 	for _, car := range available {
-// 		carYear := car.Year
-// 		carPrice := cleanFee(car.Fee)
-// 		carBodyType := strings.ToLower(strings.TrimSpace(car.BodyType))
-// 		bodyTypeMatch := bodyType == "" || carBodyType == bodyType
-// 		priceMatch := maxPrice <= 0 || carPrice <= maxPrice
-// 		yearMatch := minYear <= 1900 || carYear >= minYear
-// 		if bodyTypeMatch && priceMatch && yearMatch {
-// 			relaxedResults = append(relaxedResults, car)
-// 		}
-// 	}
-// 	if len(relaxedResults) > 0 {
-// 		return relaxedResults[:min(3, len(relaxedResults))], "Alternative Suggestions Found"
-// 	}
-
-// 	// Budget Match (Layer 4)
-// 	if maxPrice > 0 {
-// 		var budgetMatches []Car
-// 		for _, car := range available {
-// 			price := cleanFee(car.Fee)
-// 			if price <= maxPrice {
-// 				budgetMatches = append(budgetMatches, car)
-// 			}
-// 		}
-// 		if len(budgetMatches) > 0 {
-// 			return budgetMatches[:min(3, len(budgetMatches))], "Budget Match Found"
-// 		}
-// 	}
-// 	return nil, "No Cars Found"
-// }
-
-// func main() {
-// 	cars, err := loadCarsCSV("FINALL-Invygo-DB-Spreadsheet.csv")
-// 	if err != nil {
-// 		log.Fatalf("CSV load failed: %v", err)
-// 	}
-
-// 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
-// 		apiKey := r.Header.Get("x-api-key")
-// 		if apiKey != API_KEY {
-// 			w.Header().Set("Content-Type", "application/json")
-// 			w.WriteHeader(http.StatusUnauthorized)
-// 			json.NewEncoder(w).Encode(map[string]interface{}{
-// 				"error": "Unauthorized",
-// 				"message": "A valid API key is required to access this endpoint.",
-// 				"status": 401,
-// 			})
-// 			return
-// 		}
-
-// 		var req SearchRequest
-// 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-// 			http.Error(w, "Invalid request", http.StatusBadRequest)
-// 			return
-// 		}
-// 		results, status := filterCars(req, cars)
-// 		resp := map[string]interface{}{
-// 			"status":  status,
-// 			"results": results,
-// 		}
-// 		w.Header().Set("Content-Type", "application/json")
-// 		json.NewEncoder(w).Encode(resp)
-// 	})
-// 	log.Println("Go filter service running on :8080 (API key required)")
-// 	log.Fatal(http.ListenAndServe(":8080", nil))
-// }
