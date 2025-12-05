@@ -3,10 +3,9 @@ package main
 import (
 	"encoding/csv"
 	"encoding/json"
-	"io"
+	"fmt"
 	"log"
 	"net/http"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -14,339 +13,597 @@ import (
 	"time"
 )
 
-const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20zz90"
+// --- Configuration ---
+const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20z999"
 
-// Use your Google Sheets CSV export URL (NOT the /edit link)
-const CSV_URL = "https://docs.google.com/spreadsheets/d/1cTC1lQRibMRmcVi4bT6nxHLPE5OjuypNZ71XoY8_v0g/export?format=csv"
+// REPLACE WITH YOUR ACTUAL SHEET URL
+const CSV_URL = "https://docs.google.com/spreadsheets/d/16akbI2qWPMuUwdd73h2YXHnaVgZDVuJ99z83hYCeZ1U/export?format=csv"
 
-// Cache settings
-const cacheTTL = time.Minute // 1 minute cache
+const CACHE_TTL = 1 * time.Minute
 
+// --- Data Models ---
 type Car struct {
-	Position         int    `json:"Position"`
-	SubscriptionType string `json:"Subscription Type"`
-	Availability     string `json:"Availability"`
-	Year             int    `json:"Year"`
-	CarModel         string `json:"Car Model"`
-	ContractDuration string `json:"Contract Duration"`
-	Mileage          string `json:"Mileage"`
-	Fee              string `json:"Fee"`
-	BodyType         string `json:"Body Type"`
+	Country      string  `json:"country"`
+	City         string  `json:"city"`
+	Brand        string  `json:"brand_name"`
+	Model        string  `json:"car_name_fixed"`
+	Year         int     `json:"manufacturing_year"`
+	Trim         string  `json:"trim"`
+	Color        string  `json:"color"`
+	StarterFee   float64 `json:"starter_fee"`
+	MonthlyFee   float64 `json:"monthly_fee"`
+	Condition    string  `json:"car_condition"`
+	Availability string  `json:"availability"`
+	Seats        string  `json:"seating_capacity"`
+	BestFor      string  `json:"best_for"`
+	BodyType     string  `json:"body_type"`
+	
+	// Enriched
+	PlanType     string  `json:"plan_type"` 
+	IsHighSpec   bool    `json:"is_high_spec"`
+}
+
+type GroupedResult struct {
+	Description     string   `json:"description"`
+	Brand           string   `json:"brand"`
+	Model           string   `json:"model"`
+	Year            int      `json:"year"`
+	Condition       string   `json:"condition"`
+	BodyType        string   `json:"body_type"`
+	PlanType        string   `json:"plan_type"`
+	MonthlyFee      float64  `json:"monthly_fee"`
+	StarterFee      float64  `json:"starter_fee"`
+	AvailableColors []string `json:"available_colors"`
+	Features        string   `json:"features"`
+	BestFor         string   `json:"best_for"`
 }
 
 type SearchRequest struct {
-	CarModel string `json:"car_model"`
-	BodyType string `json:"body_type"`
-	MaxPrice string `json:"max_price"`
-	MinYear  string `json:"min_year"`
+	City           string  `json:"city"`
+	Query          string  `json:"query"`
+	Intention      string  `json:"intention"`
+	MaxPrice       float64 `json:"max_price"`
+	Color          string  `json:"color"`
+	Condition      string  `json:"condition"`
 }
 
-type carCache struct {
-	cars      []Car
-	expiresAt time.Time
-	mu        sync.RWMutex
+type InventoryCache struct {
+	Cars      []Car
+	ExpiresAt time.Time
+	Mu        sync.RWMutex
+}
+var globalCache InventoryCache
+
+// --- Helpers ---
+func cleanPrice(s string) float64 {
+	s = strings.ReplaceAll(s, ",", "")
+	s = strings.ReplaceAll(s, "\"", "")
+	f, _ := strconv.ParseFloat(s, 64)
+	return f
+}
+func cleanYear(s string) int {
+	s = strings.ReplaceAll(s, ",", "")
+	s = strings.ReplaceAll(s, "\"", "")
+	i, _ := strconv.Atoi(s)
+	return i
 }
 
-var inventoryCache carCache
-
-// cleanFee: "AED 4120.00" -> 4120.0
-func cleanFee(fee string) float64 {
-	re := regexp.MustCompile(`[^\d.]`)
-	cleaned := re.ReplaceAllString(fee, "")
-	price, _ := strconv.ParseFloat(cleaned, 64)
-	return price
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-// ---- CSV loading helpers ----
-
-func loadCarsCSVFromReader(r io.Reader) ([]Car, error) {
-	reader := csv.NewReader(r)
-	// Optional: be tolerant to odd quoting
-	reader.LazyQuotes = true
-
-	records, err := reader.ReadAll()
-	if err != nil {
-		return nil, err
-	}
-
-	var cars []Car
-	for i, row := range records {
-		if i == 0 {
-			continue // skip header
-		}
-		if len(row) < 9 {
-			continue // guard against short rows
-		}
-		year, _ := strconv.Atoi(row[3])
-		position, _ := strconv.Atoi(row[0])
-		cars = append(cars, Car{
-			Position:         position,
-			SubscriptionType: row[1],
-			Availability:     row[2],
-			Year:            year,
-			CarModel:        row[4],
-			ContractDuration: row[5],
-			Mileage:        row[6],
-			Fee:            row[7],
-			BodyType:      row[8],
-		})
-	}
-	return cars, nil
-}
-
+// --- Loader ---
 func loadCarsFromURL(url string) ([]Car, error) {
 	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
+	if err != nil { return nil, err }
 	defer resp.Body.Close()
-	return loadCarsCSVFromReader(resp.Body)
+
+	reader := csv.NewReader(resp.Body)
+	reader.FieldsPerRecord = -1
+	records, err := reader.ReadAll()
+	if err != nil { return nil, err }
+
+	var loaded []Car
+	for i, row := range records {
+		if i == 0 || len(row) < 14 { continue }
+
+		c := Car{
+			Country:      row[0],
+			City:         strings.TrimSpace(row[1]),
+			Brand:        strings.TrimSpace(row[2]),
+			Model:        strings.TrimSpace(row[3]),
+			Year:         cleanYear(row[4]),
+			Trim:         strings.TrimSpace(row[5]),
+			Color:        strings.TrimSpace(row[6]),
+			StarterFee:   cleanPrice(row[7]),
+			MonthlyFee:   cleanPrice(row[8]),
+			Condition:    strings.ToUpper(row[9]),
+			Availability: strings.TrimSpace(row[10]),
+			Seats:        strings.TrimSpace(row[11]),
+			BestFor:      strings.TrimSpace(row[12]),
+			BodyType:     strings.TrimSpace(row[13]),
+            
+            // CRITICAL: Force all inventory to STO Logic
+            PlanType:     "Subscribe to Own", 
+		}
+
+		trimUpper := strings.ToUpper(c.Trim)
+		if strings.Contains(trimUpper, "SMART") || strings.Contains(trimUpper, "DELUXE") || strings.Contains(trimUpper, "PREMIUM") || strings.Contains(trimUpper, "FULL") {
+			c.IsHighSpec = true
+		}
+		loaded = append(loaded, c)
+	}
+	return loaded, nil
 }
 
-// getInventory returns cached cars if fresh, otherwise reloads from CSV_URL
 func getInventory() ([]Car, error) {
-	inventoryCache.mu.RLock()
-	cached := inventoryCache.cars
-	exp := inventoryCache.expiresAt
-	inventoryCache.mu.RUnlock()
+	globalCache.Mu.RLock()
+	cached := globalCache.Cars
+	expiry := globalCache.ExpiresAt
+	globalCache.Mu.RUnlock()
 
-	now := time.Now()
-	if cached != nil && now.Before(exp) {
-		return cached, nil
-	}
+	if len(cached) > 0 && time.Now().Before(expiry) { return cached, nil }
 
-	// Need to refresh cache
-	cars, err := loadCarsFromURL(CSV_URL)
+	freshCars, err := loadCarsFromURL(CSV_URL)
 	if err != nil {
+		if len(cached) > 0 { return cached, nil }
 		return nil, err
 	}
-
-	inventoryCache.mu.Lock()
-	inventoryCache.cars = cars
-	inventoryCache.expiresAt = time.Now().Add(cacheTTL)
-	inventoryCache.mu.Unlock()
-
-	return cars, nil
+	globalCache.Mu.Lock()
+	globalCache.Cars = freshCars
+	globalCache.ExpiresAt = time.Now().Add(CACHE_TTL)
+	globalCache.Mu.Unlock()
+	return freshCars, nil
 }
 
-// ---- Smart Search v2.1 filtering logic ----
-
-// filterCars implements the exact same multi-layer logic as your JS code.
-// Returns: matching cars, status string, and optional message ("" if none).
-func filterCars(req SearchRequest, cars []Car) ([]Car, string, string) {
-	// Step 4: clean user inputs
-	minYear, _ := strconv.Atoi(req.MinYear)
-	maxPrice := cleanFee(req.MaxPrice)
-	bodyType := strings.ToLower(strings.TrimSpace(req.BodyType))
-
-	// THE FIX: remove all spaces from user's car model input
-	carModelInput := strings.ToLower(strings.TrimSpace(req.CarModel))
-	carModelInput = strings.ReplaceAll(carModelInput, " ", "")
-
-	// --- Step 3: master list of ONLY available cars ---
-	available := []Car{}
-	for _, c := range cars {
-		if strings.ToLower(strings.TrimSpace(c.Availability)) == "available now" {
-			available = append(available, c)
-		}
+// --- FILTERING ---
+func matchIntention(car Car, intention string) bool {
+	if intention == "" || intention == "none" { return true }
+	bestFor := strings.ToLower(car.BestFor)
+	body := strings.ToLower(car.BodyType)
+	switch intention {
+	case "family": return strings.Contains(car.Seats, "7") || strings.Contains(bestFor, "family")
+	case "desert": return strings.Contains(body, "suv") || strings.Contains(bestFor, "adventure")
+	case "budget": return strings.Contains(bestFor, "budget") || strings.Contains(bestFor, "city")
+	case "luxury": return car.IsHighSpec || car.MonthlyFee > 3000
+	case "travel": return strings.Contains(bestFor, "comfort") || strings.Contains(bestFor, "travel")
 	}
-
-	// --- Layer 1: Ideal Match ---
-	idealResults := []Car{}
-	for _, car := range available {
-		carYear := car.Year
-		carPrice := cleanFee(car.Fee)
-		carBodyType := strings.ToLower(strings.TrimSpace(car.BodyType))
-
-		// THE FIX: remove all spaces from DB car model before comparing
-		carModelFromDB := strings.ToLower(car.CarModel)
-		carModelFromDB = strings.ReplaceAll(carModelFromDB, " ", "")
-
-		// Only check criteria if the user actually provided them
-		modelMatch := (carModelInput == "") || strings.Contains(carModelFromDB, carModelInput)
-		bodyTypeMatch := (bodyType == "") || carBodyType == bodyType
-		priceMatch := (maxPrice <= 0) || carPrice <= maxPrice
-		yearMatch := (minYear <= 1900) || carYear >= minYear
-
-		if modelMatch && bodyTypeMatch && priceMatch && yearMatch {
-			idealResults = append(idealResults, car)
-		}
-	}
-
-	if len(idealResults) > 0 {
-		return idealResults[:min(3, len(idealResults))], "Ideal Match Found", ""
-	}
-
-	// --- Layer 2: Flexible Model + Budget Match ---
-	if carModelInput != "" {
-		type modelMatchWithDiff struct {
-			Car       Car
-			PriceDiff float64
-		}
-		mm := []modelMatchWithDiff{}
-
-		for _, car := range available {
-			dbCarModel := strings.ToLower(car.CarModel)
-			dbCarModel = strings.ReplaceAll(dbCarModel, " ", "")
-			if strings.Contains(dbCarModel, carModelInput) {
-				price := cleanFee(car.Fee)
-				diff := maxPrice - price
-				if diff < 0 {
-					diff = -diff
-				}
-				mm = append(mm, modelMatchWithDiff{
-					Car:       car,
-					PriceDiff: diff,
-				})
-			}
-		}
-
-		if len(mm) > 0 {
-			// sort ascending by price_diff
-			sort.Slice(mm, func(i, j int) bool {
-				return mm[i].PriceDiff < mm[j].PriceDiff
-			})
-
-			// take top 3 cars
-			out := []Car{}
-			for i := 0; i < min(3, len(mm)); i++ {
-				out = append(out, mm[i].Car)
-			}
-
-			msg := "I couldn't find a perfect match, but I found some other " +
-				req.CarModel +
-				" models that are very close to your budget."
-
-			return out, "Flexible Model Match Found", msg
-		}
-	}
-
-	// --- Layer 3: Alternative Suggestions (Relaxed Match) ---
-	relaxedResults := []Car{}
-	for _, car := range available {
-		carYear := car.Year
-		carPrice := cleanFee(car.Fee)
-		carBodyType := strings.ToLower(strings.TrimSpace(car.BodyType))
-
-		bodyTypeMatch := (bodyType == "") || carBodyType == bodyType
-		priceMatch := (maxPrice <= 0) || carPrice <= maxPrice
-		yearMatch := (minYear <= 1900) || carYear >= minYear
-
-		if bodyTypeMatch && priceMatch && yearMatch {
-			relaxedResults = append(relaxedResults, car)
-		}
-	}
-
-	if len(relaxedResults) > 0 {
-		yearPart := "any year"
-		if strings.TrimSpace(req.MinYear) != "" {
-			yearPart = req.MinYear
-		}
-
-		msg := "While I couldn't find that exact model, I did find some other great " +
-			req.BodyType + "s from " + yearPart + " within your budget."
-
-		return relaxedResults[:min(3, len(relaxedResults))], "Alternative Suggestions Found", msg
-	}
-
-	// --- Layer 4: Budget-First Match ---
-	if maxPrice > 0 {
-		type budgetMatch struct {
-			Car          Car
-			PriceNumeric float64
-		}
-		bm := []budgetMatch{}
-
-		for _, car := range available {
-			price := cleanFee(car.Fee)
-			if price <= maxPrice {
-				bm = append(bm, budgetMatch{
-					Car:          car,
-					PriceNumeric: price,
-				})
-			}
-		}
-
-		if len(bm) > 0 {
-			// sort descending by price_numeric (most premium first)
-			sort.Slice(bm, func(i, j int) bool {
-				return bm[i].PriceNumeric > bm[j].PriceNumeric
-			})
-
-			out := []Car{}
-			for i := 0; i < min(3, len(bm)); i++ {
-				out = append(out, bm[i].Car)
-			}
-
-			msg := "It seems we don't have cars matching all your criteria right now. " +
-				"However, based on your budget, here are a few excellent options I can offer."
-
-			return out, "Budget Match Found", msg
-		}
-	}
-
-	// --- Final Layer: No Cars Found ---
-	noMsg := "I'm sorry, but it seems we don't have any vehicles available that fit your request at the moment, " +
-		"even with a wider search. Would you like to try searching with a different budget or car type?"
-
-	return nil, "No Cars Found", noMsg
+	return true
 }
 
-// ---- HTTP server ----
+func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, string) {
+	reqCity := strings.ToLower(strings.TrimSpace(req.City))
+	reqQuery := strings.ToLower(strings.TrimSpace(req.Query))
+	reqCond := strings.ToUpper(strings.TrimSpace(req.Condition))
+
+	var baseSet []Car
+	for _, car := range inventory {
+		if strings.ToLower(car.Availability) != "available" { continue }
+		if strings.ToLower(car.City) != reqCity { continue }
+		if reqCond != "" && car.Condition != reqCond { continue }
+		// Removed "PlanPreference" logic. All cars are valid.
+		baseSet = append(baseSet, car)
+	}
+
+	if len(baseSet) == 0 {
+		return nil, "No Cars Found", "I'm sorry, we currently have no cars available in " + req.City + "."
+	}
+
+	// Layer 1: Ideal Match
+	var layer1 []Car
+	for _, car := range baseSet {
+		if reqQuery != "" {
+			fullText := strings.ToLower(car.Brand + " " + car.Model + " " + car.BodyType)
+			if !strings.Contains(fullText, reqQuery) { continue }
+		}
+		if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice { continue }
+		if !matchIntention(car, req.Intention) { continue }
+		layer1 = append(layer1, car)
+	}
+	if len(layer1) > 0 {
+		return groupResults(layer1), "Ideal Match Found", "Great news! I found exactly what you're looking for."
+	}
+
+	// Layer 2: Smart Swap
+	if reqQuery != "" || req.Intention != "" {
+		var layer2 []Car
+		for _, car := range baseSet {
+			if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice { continue }
+			if !matchIntention(car, req.Intention) { continue }
+			layer2 = append(layer2, car)
+		}
+		if len(layer2) > 0 {
+			return groupResults(layer2), "Alternative Suggestions Found", "I couldn't find that specific model, but I found these excellent alternatives."
+		}
+	}
+
+	// Layer 3: Budget Match
+	if req.MaxPrice > 0 {
+		var layer3 []Car
+		for _, car := range baseSet {
+			if car.MonthlyFee <= req.MaxPrice { layer3 = append(layer3, car) }
+		}
+		sort.Slice(layer3, func(i, j int) bool { return layer3[i].MonthlyFee > layer3[j].MonthlyFee })
+		if len(layer3) > 0 {
+			return groupResults(layer3), "Budget Match Found", "I found these options that fit perfectly within your monthly budget."
+		}
+	}
+
+	// Layer 4: Upsell
+	sort.Slice(baseSet, func(i, j int) bool { return baseSet[i].MonthlyFee < baseSet[j].MonthlyFee })
+	upsell := baseSet
+	if len(upsell) > 3 { upsell = upsell[:3] }
+	msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but my options start from %.0f/month.", req.MaxPrice, upsell[0].MonthlyFee)
+	return groupResults(upsell), "Upsell Options Found", msg
+}
+
+func groupResults(cars []Car) []GroupedResult {
+	grouped := make(map[string]*GroupedResult)
+	var order []string
+
+	for _, car := range cars {
+		key := fmt.Sprintf("%s-%s-%d-%s-%.0f", car.Brand, car.Model, car.Year, car.Condition, car.MonthlyFee)
+		if _, exists := grouped[key]; !exists {
+			feat := ""
+			if car.IsHighSpec { feat += "High Spec " }
+			if strings.Contains(car.Seats, "7") { feat += "7-Seater " }
+
+			grouped[key] = &GroupedResult{
+				Description:     fmt.Sprintf("%s %s %d", car.Brand, car.Model, car.Year),
+				Brand:           car.Brand,
+				Model:           car.Model,
+				Year:            car.Year,
+				Condition:       car.Condition,
+				BodyType:        car.BodyType,
+				PlanType:        car.PlanType,
+				MonthlyFee:      car.MonthlyFee,
+				StarterFee:      car.StarterFee,
+				AvailableColors: []string{},
+				Features:        strings.TrimSpace(feat),
+				BestFor:         car.BestFor,
+			}
+			order = append(order, key)
+		}
+		isNew := true
+		for _, c := range grouped[key].AvailableColors {
+			if c == car.Color { isNew = false; break }
+		}
+		if isNew { grouped[key].AvailableColors = append(grouped[key].AvailableColors, car.Color) }
+	}
+
+	var results []GroupedResult
+	for _, key := range order { results = append(results, *grouped[key]) }
+	if len(results) > 3 { results = results[:3] }
+	return results
+}
+
+// HANDLER
+func SearchHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if r.Header.Get("x-api-key") != API_KEY {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "Unauthorized"})
+		return
+	}
+	var req SearchRequest
+	json.NewDecoder(r.Body).Decode(&req)
+	if req.City == "" {
+		json.NewEncoder(w).Encode(map[string]interface{}{"status": "Error", "message": "City is mandatory."})
+		return
+	}
+	cars, _ := getInventory()
+	results, status, msg := filterCars(req, cars)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": status, "message": msg, "results": results,
+	})
+}
 
 func main() {
-	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
-		apiKey := r.Header.Get("x-api-key")
-		if apiKey != API_KEY {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error":   "Unauthorized",
-				"message": "A valid API key is required to access this endpoint.",
-				"status":  401,
-			})
-			return
-		}
-
-		var req SearchRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, "Invalid request", http.StatusBadRequest)
-			return
-		}
-
-		cars, err := getInventory()
-		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error":   "InventoryLoadError",
-				"message": err.Error(),
-				"status":  500,
-			})
-			return
-		}
-
-		results, status, message := filterCars(req, cars)
-
-		resp := map[string]interface{}{
-			"status":  status,
-			"results": results,
-		}
-		if message != "" {
-			resp["message"] = message
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
-	})
-
-	log.Println("Go filter service running on :8080 (API key + CSV URL + cache)")
+	_, err := getInventory()
+	if err != nil { log.Println("Init Error:", err) } else { log.Println("Inventory Loaded.") }
+	http.HandleFunc("/search", SearchHandler)
+	log.Println("Service running on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
+
+// package main
+
+// import (
+// 	"encoding/csv"
+// 	"encoding/json"
+// 	"fmt"
+// 	"log"
+// 	"net/http"
+// 	"sort"
+// 	"strconv"
+// 	"strings"
+// 	"sync"
+// 	"time"
+// )
+
+
+// const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20z999"
+
+// // 2. Data Source
+// // CRITICAL: Replace 'YOUR_NEW_SHEET_ID_HERE' with the ID of your new "Invygo Inventory List"
+// const CSV_URL = "https://docs.google.com/spreadsheets/d/16akbI2qWPMuUwdd73h2YXHnaVgZDVuJ99z83hYCeZ1U/export?format=csv"
+
+// const CACHE_TTL = 1 * time.Minute
+
+// // --- Data Models ---
+// type Car struct {
+// 	Country      string  `json:"country"`
+// 	City         string  `json:"city"`
+// 	Brand        string  `json:"brand_name"`
+// 	Model        string  `json:"car_name_fixed"`
+// 	Year         int     `json:"manufacturing_year"`
+// 	Trim         string  `json:"trim"`
+// 	Color        string  `json:"color"`
+// 	StarterFee   float64 `json:"starter_fee"`
+// 	MonthlyFee   float64 `json:"monthly_fee"`
+// 	Condition    string  `json:"car_condition"`
+// 	Availability string  `json:"availability"`
+// 	Seats        string  `json:"seating_capacity"`
+// 	BestFor      string  `json:"best_for"`
+// 	BodyType     string  `json:"body_type"`
+
+// 	PlanType   string `json:"plan_type"`
+// 	IsHighSpec bool   `json:"is_high_spec"`
+// }
+
+// type GroupedResult struct {
+// 	Description     string   `json:"description"`
+// 	Brand           string   `json:"brand"`
+// 	Model           string   `json:"model"`
+// 	Year            int      `json:"year"`
+// 	Condition       string   `json:"condition"`
+// 	BodyType        string   `json:"body_type"`
+// 	PlanType        string   `json:"plan_type"`
+// 	MonthlyFee      float64  `json:"monthly_fee"`
+// 	StarterFee      float64  `json:"starter_fee"`
+// 	AvailableColors []string `json:"available_colors"`
+// 	Features        string   `json:"features"`
+// 	BestFor         string   `json:"best_for"`
+// }
+
+// type SearchRequest struct {
+// 	City           string  `json:"city"`
+// 	PlanPreference string  `json:"plan_preference"`
+// 	Query          string  `json:"query"`
+// 	Intention      string  `json:"intention"`
+// 	MaxPrice       float64 `json:"max_price"`
+// 	Color          string  `json:"color"`
+// 	Condition      string  `json:"condition"`
+// }
+
+// type InventoryCache struct {
+// 	Cars      []Car
+// 	ExpiresAt time.Time
+// 	Mu        sync.RWMutex
+// }
+// var globalCache InventoryCache
+
+// // --- Helpers ---
+// func cleanPrice(s string) float64 {
+// 	s = strings.ReplaceAll(s, ",", "")
+// 	s = strings.ReplaceAll(s, "\"", "")
+// 	f, _ := strconv.ParseFloat(s, 64)
+// 	return f
+// }
+// func cleanYear(s string) int {
+// 	s = strings.ReplaceAll(s, ",", "")
+// 	s = strings.ReplaceAll(s, "\"", "")
+// 	i, _ := strconv.Atoi(s)
+// 	return i
+// }
+
+// // --- Loader ---
+// func loadCarsFromURL(url string) ([]Car, error) {
+// 	resp, err := http.Get(url)
+// 	if err != nil { return nil, err }
+// 	defer resp.Body.Close()
+
+// 	reader := csv.NewReader(resp.Body)
+// 	reader.FieldsPerRecord = -1
+// 	records, err := reader.ReadAll()
+// 	if err != nil { return nil, err }
+
+// 	var loaded []Car
+// 	for i, row := range records {
+// 		if i == 0 || len(row) < 14 { continue }
+
+// 		c := Car{
+// 			Country:      row[0],
+// 			City:         strings.TrimSpace(row[1]),
+// 			Brand:        strings.TrimSpace(row[2]),
+// 			Model:        strings.TrimSpace(row[3]),
+// 			Year:         cleanYear(row[4]),
+// 			Trim:         strings.TrimSpace(row[5]),
+// 			Color:        strings.TrimSpace(row[6]),
+// 			StarterFee:   cleanPrice(row[7]),
+// 			MonthlyFee:   cleanPrice(row[8]),
+// 			Condition:    strings.ToUpper(row[9]),
+// 			Availability: strings.TrimSpace(row[10]),
+// 			Seats:        strings.TrimSpace(row[11]),
+// 			BestFor:      strings.TrimSpace(row[12]),
+// 			BodyType:     strings.TrimSpace(row[13]),
+// 		}
+
+// 		if c.StarterFee > 100 { c.PlanType = "Subscribe to Own" } else { c.PlanType = "Monthly Flex" }
+// 		trimUpper := strings.ToUpper(c.Trim)
+// 		if strings.Contains(trimUpper, "SMART") || strings.Contains(trimUpper, "DELUXE") || strings.Contains(trimUpper, "PREMIUM") || strings.Contains(trimUpper, "FULL") {
+// 			c.IsHighSpec = true
+// 		}
+// 		loaded = append(loaded, c)
+// 	}
+// 	return loaded, nil
+// }
+
+// func getInventory() ([]Car, error) {
+// 	globalCache.Mu.RLock()
+// 	cached := globalCache.Cars
+// 	expiry := globalCache.ExpiresAt
+// 	globalCache.Mu.RUnlock()
+
+// 	if len(cached) > 0 && time.Now().Before(expiry) { return cached, nil }
+
+// 	freshCars, err := loadCarsFromURL(CSV_URL)
+// 	if err != nil {
+// 		if len(cached) > 0 { return cached, nil }
+// 		return nil, err
+// 	}
+// 	globalCache.Mu.Lock()
+// 	globalCache.Cars = freshCars
+// 	globalCache.ExpiresAt = time.Now().Add(CACHE_TTL)
+// 	globalCache.Mu.Unlock()
+// 	return freshCars, nil
+// }
+
+// // --- FILTERING ---
+// func matchIntention(car Car, intention string) bool {
+// 	if intention == "" || intention == "none" { return true }
+// 	bestFor := strings.ToLower(car.BestFor)
+// 	body := strings.ToLower(car.BodyType)
+// 	switch intention {
+// 	case "family": return strings.Contains(car.Seats, "7") || strings.Contains(bestFor, "family")
+// 	case "desert": return strings.Contains(body, "suv") || strings.Contains(bestFor, "adventure")
+// 	case "budget": return strings.Contains(bestFor, "budget") || strings.Contains(bestFor, "city")
+// 	case "luxury": return car.IsHighSpec || car.MonthlyFee > 3000
+// 	case "travel": return strings.Contains(bestFor, "comfort") || strings.Contains(bestFor, "travel")
+// 	}
+// 	return true
+// }
+
+// func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, string) {
+// 	reqCity := strings.ToLower(strings.TrimSpace(req.City))
+// 	reqQuery := strings.ToLower(strings.TrimSpace(req.Query))
+// 	reqCond := strings.ToUpper(strings.TrimSpace(req.Condition))
+
+// 	var baseSet []Car
+// 	for _, car := range inventory {
+// 		if strings.ToLower(car.Availability) != "available" { continue }
+// 		if strings.ToLower(car.City) != reqCity { continue }
+// 		if reqCond != "" && car.Condition != reqCond { continue }
+// 		if req.PlanPreference == "own" && car.PlanType != "Subscribe to Own" { continue }
+// 		if req.PlanPreference == "rent" && car.PlanType != "Monthly Flex" { continue }
+// 		baseSet = append(baseSet, car)
+// 	}
+
+// 	if len(baseSet) == 0 {
+// 		return nil, "No Cars Found", "I'm sorry, we currently have no cars available in " + req.City + " for that plan type."
+// 	}
+
+// 	// Layer 1: Ideal Match
+// 	var layer1 []Car
+// 	for _, car := range baseSet {
+// 		if reqQuery != "" {
+// 			fullText := strings.ToLower(car.Brand + " " + car.Model + " " + car.BodyType)
+// 			if !strings.Contains(fullText, reqQuery) { continue }
+// 		}
+// 		if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice { continue }
+// 		if !matchIntention(car, req.Intention) { continue }
+// 		layer1 = append(layer1, car)
+// 	}
+// 	if len(layer1) > 0 {
+// 		return groupResults(layer1), "Ideal Match Found", "Great news! I found exactly what you're looking for."
+// 	}
+
+// 	// Layer 2: Smart Swap (Intention Match)
+// 	if reqQuery != "" || req.Intention != "" {
+// 		var layer2 []Car
+// 		for _, car := range baseSet {
+// 			if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice { continue }
+// 			if !matchIntention(car, req.Intention) { continue }
+// 			layer2 = append(layer2, car)
+// 		}
+// 		if len(layer2) > 0 {
+// 			return groupResults(layer2), "Alternative Suggestions Found", "I couldn't find that specific model, but I found these cars that match your needs perfectly."
+// 		}
+// 	}
+
+// 	// Layer 3: Budget Match
+// 	if req.MaxPrice > 0 {
+// 		var layer3 []Car
+// 		for _, car := range baseSet {
+// 			if car.MonthlyFee <= req.MaxPrice { layer3 = append(layer3, car) }
+// 		}
+// 		sort.Slice(layer3, func(i, j int) bool { return layer3[i].MonthlyFee > layer3[j].MonthlyFee })
+// 		if len(layer3) > 0 {
+// 			return groupResults(layer3), "Budget Match Found", "I couldn't find a car with those exact specs, but here are the best options within your budget."
+// 		}
+// 	}
+
+// 	// Layer 4: Upsell
+// 	sort.Slice(baseSet, func(i, j int) bool { return baseSet[i].MonthlyFee < baseSet[j].MonthlyFee })
+// 	upsell := baseSet
+// 	if len(upsell) > 3 { upsell = upsell[:3] }
+// 	msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but my options start from %.0f.", req.MaxPrice, upsell[0].MonthlyFee)
+// 	return groupResults(upsell), "Upsell Options Found", msg
+// }
+
+// func groupResults(cars []Car) []GroupedResult {
+// 	grouped := make(map[string]*GroupedResult)
+// 	var order []string
+
+// 	for _, car := range cars {
+// 		key := fmt.Sprintf("%s-%s-%d-%s-%.0f-%s", car.Brand, car.Model, car.Year, car.Condition, car.MonthlyFee, car.PlanType)
+// 		if _, exists := grouped[key]; !exists {
+// 			feat := ""
+// 			if car.IsHighSpec { feat += "High Spec " }
+// 			if strings.Contains(car.Seats, "7") { feat += "7-Seater " }
+
+// 			grouped[key] = &GroupedResult{
+// 				Description:     fmt.Sprintf("%s %s %d", car.Brand, car.Model, car.Year),
+// 				Brand:           car.Brand,
+// 				Model:           car.Model,
+// 				Year:            car.Year,
+// 				Condition:       car.Condition,
+// 				BodyType:        car.BodyType,
+// 				PlanType:        car.PlanType,
+// 				MonthlyFee:      car.MonthlyFee,
+// 				StarterFee:      car.StarterFee,
+// 				AvailableColors: []string{},
+// 				Features:        strings.TrimSpace(feat),
+// 				BestFor:         car.BestFor,
+// 			}
+// 			order = append(order, key)
+// 		}
+// 		isNew := true
+// 		for _, c := range grouped[key].AvailableColors {
+// 			if c == car.Color { isNew = false; break }
+// 		}
+// 		if isNew { grouped[key].AvailableColors = append(grouped[key].AvailableColors, car.Color) }
+// 	}
+
+// 	var results []GroupedResult
+// 	for _, key := range order { results = append(results, *grouped[key]) }
+// 	if len(results) > 3 { results = results[:3] }
+// 	return results
+// }
+
+// func main() {
+// 	_, err := getInventory()
+// 	if err != nil { log.Println("Init Error:", err) } else { log.Println("Inventory Loaded.") }
+
+// 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
+// 		w.Header().Set("Content-Type", "application/json") // FORCE JSON
+		
+// 		if r.Header.Get("x-api-key") != API_KEY {
+// 			w.WriteHeader(http.StatusUnauthorized)
+// 			json.NewEncoder(w).Encode(map[string]interface{}{"error": "Unauthorized"})
+// 			return
+// 		}
+
+// 		var req SearchRequest
+// 		json.NewDecoder(r.Body).Decode(&req)
+		
+// 		if req.City == "" {
+// 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "Error", "message": "City is mandatory."})
+// 			return
+// 		}
+
+// 		cars, _ := getInventory()
+// 		results, status, msg := filterCars(req, cars)
+
+// 		json.NewEncoder(w).Encode(map[string]interface{}{
+// 			"status": status, "message": msg, "results": results,
+// 		})
+// 	})
+// 	log.Fatal(http.ListenAndServe(":8080", nil))
+// }
