@@ -14,9 +14,9 @@ import (
 )
 
 // --- Configuration ---
-const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20z999"
+const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20zz90"
 
-// REPLACE WITH YOUR ACTUAL SHEET URL
+// YOUR LIVE SHEET URL
 const CSV_URL = "https://docs.google.com/spreadsheets/d/16akbI2qWPMuUwdd73h2YXHnaVgZDVuJ99z83hYCeZ1U/export?format=csv"
 
 const CACHE_TTL = 1 * time.Minute
@@ -34,11 +34,13 @@ type Car struct {
 	MonthlyFee   float64 `json:"monthly_fee"`
 	Condition    string  `json:"car_condition"`
 	Availability string  `json:"availability"`
+	
+	// RESTORED FIELDS (Used for Logic)
 	Seats        string  `json:"seating_capacity"`
 	BestFor      string  `json:"best_for"`
 	BodyType     string  `json:"body_type"`
 	
-	// Enriched
+	// Enriched Fields
 	PlanType     string  `json:"plan_type"` 
 	IsHighSpec   bool    `json:"is_high_spec"`
 }
@@ -55,7 +57,7 @@ type GroupedResult struct {
 	StarterFee      float64  `json:"starter_fee"`
 	AvailableColors []string `json:"available_colors"`
 	Features        string   `json:"features"`
-	BestFor         string   `json:"best_for"`
+	BestFor         string   `json:"best_for"` // Passed to Agent for context
 }
 
 type SearchRequest struct {
@@ -115,11 +117,13 @@ func loadCarsFromURL(url string) ([]Car, error) {
 			MonthlyFee:   cleanPrice(row[8]),
 			Condition:    strings.ToUpper(row[9]),
 			Availability: strings.TrimSpace(row[10]),
+			
+			// MAPPED CORRECTLY
 			Seats:        strings.TrimSpace(row[11]),
 			BestFor:      strings.TrimSpace(row[12]),
 			BodyType:     strings.TrimSpace(row[13]),
             
-            // CRITICAL: Force all inventory to STO Logic
+            // LOGIC: All cars are STO
             PlanType:     "Subscribe to Own", 
 		}
 
@@ -152,19 +156,27 @@ func getInventory() ([]Car, error) {
 	return freshCars, nil
 }
 
-// --- FILTERING ---
+// --- FILTERING (Smart Logic with Restored Fields) ---
 func matchIntention(car Car, intention string) bool {
 	if intention == "" || intention == "none" { return true }
+	
 	bestFor := strings.ToLower(car.BestFor)
 	body := strings.ToLower(car.BodyType)
+	
 	switch intention {
-	case "family": return strings.Contains(car.Seats, "7") || strings.Contains(bestFor, "family")
-	case "desert": return strings.Contains(body, "suv") || strings.Contains(bestFor, "adventure")
-	case "budget": return strings.Contains(bestFor, "budget") || strings.Contains(bestFor, "city")
-	case "luxury": return car.IsHighSpec || car.MonthlyFee > 3000
-	case "travel": return strings.Contains(bestFor, "comfort") || strings.Contains(bestFor, "travel")
+	case "family": 
+		// Logic: 7 Seats OR explicitly tagged for Family
+		return strings.Contains(car.Seats, "7") || strings.Contains(bestFor, "family")
+	case "desert": 
+		return strings.Contains(body, "suv") || strings.Contains(bestFor, "adventure")
+	case "budget": 
+		return strings.Contains(bestFor, "budget") || strings.Contains(bestFor, "city")
+	case "luxury": 
+		return car.IsHighSpec || car.MonthlyFee > 3000
+	case "travel": 
+		return strings.Contains(bestFor, "comfort") || strings.Contains(bestFor, "travel")
 	}
-	return true
+	return true 
 }
 
 func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, string) {
@@ -177,7 +189,6 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		if strings.ToLower(car.Availability) != "available" { continue }
 		if strings.ToLower(car.City) != reqCity { continue }
 		if reqCond != "" && car.Condition != reqCond { continue }
-		// Removed "PlanPreference" logic. All cars are valid.
 		baseSet = append(baseSet, car)
 	}
 
@@ -200,7 +211,7 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		return groupResults(layer1), "Ideal Match Found", "Great news! I found exactly what you're looking for."
 	}
 
-	// Layer 2: Smart Swap
+	// Layer 2: Smart Swap (Intention Match)
 	if reqQuery != "" || req.Intention != "" {
 		var layer2 []Car
 		for _, car := range baseSet {
@@ -209,7 +220,7 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 			layer2 = append(layer2, car)
 		}
 		if len(layer2) > 0 {
-			return groupResults(layer2), "Alternative Suggestions Found", "I couldn't find that specific model, but I found these excellent alternatives."
+			return groupResults(layer2), "Alternative Suggestions Found", "I couldn't find that specific model, but I found these similar cars that fit your needs."
 		}
 	}
 
@@ -242,7 +253,9 @@ func groupResults(cars []Car) []GroupedResult {
 		if _, exists := grouped[key]; !exists {
 			feat := ""
 			if car.IsHighSpec { feat += "High Spec " }
-			if strings.Contains(car.Seats, "7") { feat += "7-Seater " }
+			
+            // Feature Logic using RESTORED Data
+            if strings.Contains(car.Seats, "7") { feat += "7-Seater " }
 
 			grouped[key] = &GroupedResult{
 				Description:     fmt.Sprintf("%s %s %d", car.Brand, car.Model, car.Year),
@@ -317,11 +330,10 @@ func main() {
 // 	"time"
 // )
 
-
+// // --- Configuration ---
 // const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20z999"
 
-// // 2. Data Source
-// // CRITICAL: Replace 'YOUR_NEW_SHEET_ID_HERE' with the ID of your new "Invygo Inventory List"
+// // REPLACE WITH YOUR ACTUAL SHEET URL
 // const CSV_URL = "https://docs.google.com/spreadsheets/d/16akbI2qWPMuUwdd73h2YXHnaVgZDVuJ99z83hYCeZ1U/export?format=csv"
 
 // const CACHE_TTL = 1 * time.Minute
@@ -342,9 +354,10 @@ func main() {
 // 	Seats        string  `json:"seating_capacity"`
 // 	BestFor      string  `json:"best_for"`
 // 	BodyType     string  `json:"body_type"`
-
-// 	PlanType   string `json:"plan_type"`
-// 	IsHighSpec bool   `json:"is_high_spec"`
+	
+// 	// Enriched
+// 	PlanType     string  `json:"plan_type"` 
+// 	IsHighSpec   bool    `json:"is_high_spec"`
 // }
 
 // type GroupedResult struct {
@@ -364,7 +377,6 @@ func main() {
 
 // type SearchRequest struct {
 // 	City           string  `json:"city"`
-// 	PlanPreference string  `json:"plan_preference"`
 // 	Query          string  `json:"query"`
 // 	Intention      string  `json:"intention"`
 // 	MaxPrice       float64 `json:"max_price"`
@@ -423,9 +435,11 @@ func main() {
 // 			Seats:        strings.TrimSpace(row[11]),
 // 			BestFor:      strings.TrimSpace(row[12]),
 // 			BodyType:     strings.TrimSpace(row[13]),
+            
+//             // CRITICAL: Force all inventory to STO Logic
+//             PlanType:     "Subscribe to Own", 
 // 		}
 
-// 		if c.StarterFee > 100 { c.PlanType = "Subscribe to Own" } else { c.PlanType = "Monthly Flex" }
 // 		trimUpper := strings.ToUpper(c.Trim)
 // 		if strings.Contains(trimUpper, "SMART") || strings.Contains(trimUpper, "DELUXE") || strings.Contains(trimUpper, "PREMIUM") || strings.Contains(trimUpper, "FULL") {
 // 			c.IsHighSpec = true
@@ -480,13 +494,12 @@ func main() {
 // 		if strings.ToLower(car.Availability) != "available" { continue }
 // 		if strings.ToLower(car.City) != reqCity { continue }
 // 		if reqCond != "" && car.Condition != reqCond { continue }
-// 		if req.PlanPreference == "own" && car.PlanType != "Subscribe to Own" { continue }
-// 		if req.PlanPreference == "rent" && car.PlanType != "Monthly Flex" { continue }
+// 		// Removed "PlanPreference" logic. All cars are valid.
 // 		baseSet = append(baseSet, car)
 // 	}
 
 // 	if len(baseSet) == 0 {
-// 		return nil, "No Cars Found", "I'm sorry, we currently have no cars available in " + req.City + " for that plan type."
+// 		return nil, "No Cars Found", "I'm sorry, we currently have no cars available in " + req.City + "."
 // 	}
 
 // 	// Layer 1: Ideal Match
@@ -504,7 +517,7 @@ func main() {
 // 		return groupResults(layer1), "Ideal Match Found", "Great news! I found exactly what you're looking for."
 // 	}
 
-// 	// Layer 2: Smart Swap (Intention Match)
+// 	// Layer 2: Smart Swap
 // 	if reqQuery != "" || req.Intention != "" {
 // 		var layer2 []Car
 // 		for _, car := range baseSet {
@@ -513,7 +526,7 @@ func main() {
 // 			layer2 = append(layer2, car)
 // 		}
 // 		if len(layer2) > 0 {
-// 			return groupResults(layer2), "Alternative Suggestions Found", "I couldn't find that specific model, but I found these cars that match your needs perfectly."
+// 			return groupResults(layer2), "Alternative Suggestions Found", "I couldn't find that specific model, but I found these excellent alternatives."
 // 		}
 // 	}
 
@@ -525,7 +538,7 @@ func main() {
 // 		}
 // 		sort.Slice(layer3, func(i, j int) bool { return layer3[i].MonthlyFee > layer3[j].MonthlyFee })
 // 		if len(layer3) > 0 {
-// 			return groupResults(layer3), "Budget Match Found", "I couldn't find a car with those exact specs, but here are the best options within your budget."
+// 			return groupResults(layer3), "Budget Match Found", "I found these options that fit perfectly within your monthly budget."
 // 		}
 // 	}
 
@@ -533,7 +546,7 @@ func main() {
 // 	sort.Slice(baseSet, func(i, j int) bool { return baseSet[i].MonthlyFee < baseSet[j].MonthlyFee })
 // 	upsell := baseSet
 // 	if len(upsell) > 3 { upsell = upsell[:3] }
-// 	msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but my options start from %.0f.", req.MaxPrice, upsell[0].MonthlyFee)
+// 	msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but my options start from %.0f/month.", req.MaxPrice, upsell[0].MonthlyFee)
 // 	return groupResults(upsell), "Upsell Options Found", msg
 // }
 
@@ -542,7 +555,7 @@ func main() {
 // 	var order []string
 
 // 	for _, car := range cars {
-// 		key := fmt.Sprintf("%s-%s-%d-%s-%.0f-%s", car.Brand, car.Model, car.Year, car.Condition, car.MonthlyFee, car.PlanType)
+// 		key := fmt.Sprintf("%s-%s-%d-%s-%.0f", car.Brand, car.Model, car.Year, car.Condition, car.MonthlyFee)
 // 		if _, exists := grouped[key]; !exists {
 // 			feat := ""
 // 			if car.IsHighSpec { feat += "High Spec " }
@@ -577,33 +590,31 @@ func main() {
 // 	return results
 // }
 
+// // HANDLER
+// func SearchHandler(w http.ResponseWriter, r *http.Request) {
+// 	w.Header().Set("Content-Type", "application/json")
+// 	if r.Header.Get("x-api-key") != API_KEY {
+// 		w.WriteHeader(http.StatusUnauthorized)
+// 		json.NewEncoder(w).Encode(map[string]interface{}{"error": "Unauthorized"})
+// 		return
+// 	}
+// 	var req SearchRequest
+// 	json.NewDecoder(r.Body).Decode(&req)
+// 	if req.City == "" {
+// 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "Error", "message": "City is mandatory."})
+// 		return
+// 	}
+// 	cars, _ := getInventory()
+// 	results, status, msg := filterCars(req, cars)
+// 	json.NewEncoder(w).Encode(map[string]interface{}{
+// 		"status": status, "message": msg, "results": results,
+// 	})
+// }
+
 // func main() {
 // 	_, err := getInventory()
 // 	if err != nil { log.Println("Init Error:", err) } else { log.Println("Inventory Loaded.") }
-
-// 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
-// 		w.Header().Set("Content-Type", "application/json") // FORCE JSON
-		
-// 		if r.Header.Get("x-api-key") != API_KEY {
-// 			w.WriteHeader(http.StatusUnauthorized)
-// 			json.NewEncoder(w).Encode(map[string]interface{}{"error": "Unauthorized"})
-// 			return
-// 		}
-
-// 		var req SearchRequest
-// 		json.NewDecoder(r.Body).Decode(&req)
-		
-// 		if req.City == "" {
-// 			json.NewEncoder(w).Encode(map[string]interface{}{"status": "Error", "message": "City is mandatory."})
-// 			return
-// 		}
-
-// 		cars, _ := getInventory()
-// 		results, status, msg := filterCars(req, cars)
-
-// 		json.NewEncoder(w).Encode(map[string]interface{}{
-// 			"status": status, "message": msg, "results": results,
-// 		})
-// 	})
+// 	http.HandleFunc("/search", SearchHandler)
+// 	log.Println("Service running on :8080")
 // 	log.Fatal(http.ListenAndServe(":8080", nil))
 // }
