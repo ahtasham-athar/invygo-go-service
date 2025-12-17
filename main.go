@@ -298,8 +298,8 @@ func main() {
 	_, err := getInventory()
 	if err != nil { log.Println("Init Error:", err) } else { log.Println("Inventory Loaded.") }
 	http.HandleFunc("/search", SearchHandler)
-	log.Println("Service running on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Service running on :8889")
+	log.Fatal(http.ListenAndServe(":8889", nil))
 }
 
 // package main
