@@ -14,7 +14,7 @@ import (
 )
 
 // --- Configuration ---
-const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20zz90"
+const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20z999"
 
 // YOUR LIVE SHEET URL
 const CSV_URL = "https://docs.google.com/spreadsheets/d/16akbI2qWPMuUwdd73h2YXHnaVgZDVuJ99z83hYCeZ1U/export?format=csv"
@@ -33,14 +33,11 @@ type Car struct {
 	StarterFee   float64 `json:"starter_fee"`
 	MonthlyFee   float64 `json:"monthly_fee"`
 	Condition    string  `json:"car_condition"`
-	Availability string  `json:"availability"`
-	
-	// RESTORED FIELDS (Used for Logic)
-	Seats        string  `json:"seating_capacity"`
-	BestFor      string  `json:"best_for"`
+    // Availability, Seats, BestFor REMOVED as per instruction
+	// BodyType is now mapped from the correct column index
 	BodyType     string  `json:"body_type"`
 	
-	// Enriched Fields
+	// Enriched
 	PlanType     string  `json:"plan_type"` 
 	IsHighSpec   bool    `json:"is_high_spec"`
 }
@@ -57,16 +54,15 @@ type GroupedResult struct {
 	StarterFee      float64  `json:"starter_fee"`
 	AvailableColors []string `json:"available_colors"`
 	Features        string   `json:"features"`
-	BestFor         string   `json:"best_for"` // Passed to Agent for context
 }
 
 type SearchRequest struct {
 	City           string  `json:"city"`
 	Query          string  `json:"query"`
-	Intention      string  `json:"intention"`
 	MaxPrice       float64 `json:"max_price"`
 	Color          string  `json:"color"`
 	Condition      string  `json:"condition"`
+    // Intention REMOVED as logic is now prompt-driven
 }
 
 type InventoryCache struct {
@@ -103,7 +99,8 @@ func loadCarsFromURL(url string) ([]Car, error) {
 
 	var loaded []Car
 	for i, row := range records {
-		if i == 0 || len(row) < 14 { continue }
+        // Adjust check based on your CSV structure (11 columns used)
+		if i == 0 || len(row) < 11 { continue } 
 
 		c := Car{
 			Country:      row[0],
@@ -116,14 +113,9 @@ func loadCarsFromURL(url string) ([]Car, error) {
 			StarterFee:   cleanPrice(row[7]),
 			MonthlyFee:   cleanPrice(row[8]),
 			Condition:    strings.ToUpper(row[9]),
-			Availability: strings.TrimSpace(row[10]),
-			
-			// MAPPED CORRECTLY
-			Seats:        strings.TrimSpace(row[11]),
-			BestFor:      strings.TrimSpace(row[12]),
-			BodyType:     strings.TrimSpace(row[13]),
+            // Column 10 is BodyType in your PDF/CSV snippet
+			BodyType:     strings.TrimSpace(row[10]),
             
-            // LOGIC: All cars are STO
             PlanType:     "Subscribe to Own", 
 		}
 
@@ -156,28 +148,7 @@ func getInventory() ([]Car, error) {
 	return freshCars, nil
 }
 
-// --- FILTERING (Smart Logic with Restored Fields) ---
-func matchIntention(car Car, intention string) bool {
-	if intention == "" || intention == "none" { return true }
-	
-	bestFor := strings.ToLower(car.BestFor)
-	body := strings.ToLower(car.BodyType)
-	
-	switch intention {
-	case "family": 
-		// Logic: 7 Seats OR explicitly tagged for Family
-		return strings.Contains(car.Seats, "7") || strings.Contains(bestFor, "family")
-	case "desert": 
-		return strings.Contains(body, "suv") || strings.Contains(bestFor, "adventure")
-	case "budget": 
-		return strings.Contains(bestFor, "budget") || strings.Contains(bestFor, "city")
-	case "luxury": 
-		return car.IsHighSpec || car.MonthlyFee > 3000
-	case "travel": 
-		return strings.Contains(bestFor, "comfort") || strings.Contains(bestFor, "travel")
-	}
-	return true 
-}
+// --- FILTERING ---
 
 func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, string) {
 	reqCity := strings.ToLower(strings.TrimSpace(req.City))
@@ -186,7 +157,6 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 
 	var baseSet []Car
 	for _, car := range inventory {
-		if strings.ToLower(car.Availability) != "available" { continue }
 		if strings.ToLower(car.City) != reqCity { continue }
 		if reqCond != "" && car.Condition != reqCond { continue }
 		baseSet = append(baseSet, car)
@@ -200,31 +170,18 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 	var layer1 []Car
 	for _, car := range baseSet {
 		if reqQuery != "" {
+            // Check Brand or Model
 			fullText := strings.ToLower(car.Brand + " " + car.Model + " " + car.BodyType)
 			if !strings.Contains(fullText, reqQuery) { continue }
 		}
 		if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice { continue }
-		if !matchIntention(car, req.Intention) { continue }
 		layer1 = append(layer1, car)
 	}
 	if len(layer1) > 0 {
 		return groupResults(layer1), "Ideal Match Found", "Great news! I found exactly what you're looking for."
 	}
 
-	// Layer 2: Smart Swap (Intention Match)
-	if reqQuery != "" || req.Intention != "" {
-		var layer2 []Car
-		for _, car := range baseSet {
-			if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice { continue }
-			if !matchIntention(car, req.Intention) { continue }
-			layer2 = append(layer2, car)
-		}
-		if len(layer2) > 0 {
-			return groupResults(layer2), "Alternative Suggestions Found", "I couldn't find that specific model, but I found these similar cars that fit your needs."
-		}
-	}
-
-	// Layer 3: Budget Match
+	// Layer 2: Budget Match
 	if req.MaxPrice > 0 {
 		var layer3 []Car
 		for _, car := range baseSet {
@@ -236,7 +193,7 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		}
 	}
 
-	// Layer 4: Upsell
+	// Layer 3: Upsell
 	sort.Slice(baseSet, func(i, j int) bool { return baseSet[i].MonthlyFee < baseSet[j].MonthlyFee })
 	upsell := baseSet
 	if len(upsell) > 3 { upsell = upsell[:3] }
@@ -253,9 +210,6 @@ func groupResults(cars []Car) []GroupedResult {
 		if _, exists := grouped[key]; !exists {
 			feat := ""
 			if car.IsHighSpec { feat += "High Spec " }
-			
-            // Feature Logic using RESTORED Data
-            if strings.Contains(car.Seats, "7") { feat += "7-Seater " }
 
 			grouped[key] = &GroupedResult{
 				Description:     fmt.Sprintf("%s %s %d", car.Brand, car.Model, car.Year),
@@ -269,7 +223,6 @@ func groupResults(cars []Car) []GroupedResult {
 				StarterFee:      car.StarterFee,
 				AvailableColors: []string{},
 				Features:        strings.TrimSpace(feat),
-				BestFor:         car.BestFor,
 			}
 			order = append(order, key)
 		}
@@ -282,7 +235,7 @@ func groupResults(cars []Car) []GroupedResult {
 
 	var results []GroupedResult
 	for _, key := range order { results = append(results, *grouped[key]) }
-	if len(results) > 3 { results = results[:3] }
+	// if len(results) > 3 { results = results[:3] }
 	return results
 }
 
