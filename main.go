@@ -193,12 +193,20 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		}
 	}
 
-	// Layer 3: Upsell
+	// Layer 3: Upsell / Fallback
 	sort.Slice(baseSet, func(i, j int) bool { return baseSet[i].MonthlyFee < baseSet[j].MonthlyFee })
 	upsell := baseSet
-	if len(upsell) > 3 { upsell = upsell[:3] }
-	msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but my options start from %.0f/month.", req.MaxPrice, upsell[0].MonthlyFee)
+	// Increase limit to 20 so the Agent can find "Similar Tier" cars that are more expensive than the cheapest ones
+	if len(upsell) > 20 { upsell = upsell[:20] } 
+	msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but here are our available options.", req.MaxPrice)
 	return groupResults(upsell), "Upsell Options Found", msg
+	
+	// Layer 3: Upsell
+	// sort.Slice(baseSet, func(i, j int) bool { return baseSet[i].MonthlyFee < baseSet[j].MonthlyFee })
+	// upsell := baseSet
+	// if len(upsell) > 3 { upsell = upsell[:3] }
+	// msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but my options start from %.0f/month.", req.MaxPrice, upsell[0].MonthlyFee)
+	// return groupResults(upsell), "Upsell Options Found", msg
 }
 
 func groupResults(cars []Car) []GroupedResult {
