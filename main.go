@@ -16,30 +16,29 @@ import (
 // --- Configuration ---
 const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20z999"
 
-// YOUR LIVE SHEET URL
-const CSV_URL = "https://docs.google.com/spreadsheets/d/16akbI2qWPMuUwdd73h2YXHnaVgZDVuJ99z83hYCeZ1U/export?format=csv"
+// UPDATED SHEET URL (Using export format for direct CSV access)
+const CSV_URL = "https://docs.google.com/spreadsheets/d/1gds7nkXI6pPY_mCb1_55AoagcRU87ZnaWMYQN9YPDFA/export?format=csv"
 
 const CACHE_TTL = 1 * time.Minute
 
 // --- Data Models ---
 type Car struct {
-	Country      string  `json:"country"`
-	City         string  `json:"city"`
-	Brand        string  `json:"brand_name"`
-	Model        string  `json:"car_name_fixed"`
-	Year         int     `json:"manufacturing_year"`
-	Trim         string  `json:"trim"`
-	Color        string  `json:"color"`
-	StarterFee   float64 `json:"starter_fee"`
-	MonthlyFee   float64 `json:"monthly_fee"`
-	Condition    string  `json:"car_condition"`
-    // Availability, Seats, BestFor REMOVED as per instruction
-	// BodyType is now mapped from the correct column index
-	BodyType     string  `json:"body_type"`
-	
+	Country    string  `json:"country"`
+	City       string  `json:"city"`
+	Brand      string  `json:"brand_name"`
+	Model      string  `json:"car_name_fixed"`
+	Year       int     `json:"manufacturing_year"`
+	Trim       string  `json:"trim"`
+	Color      string  `json:"color"`
+	StarterFee float64 `json:"starter_fee"`
+	MonthlyFee float64 `json:"monthly_fee"`
+	Condition  string  `json:"car_condition"`
+	Tier       string  `json:"tier"`       // Column K (Index 10)
+	BodyType   string  `json:"body_type"`  // Column L (Index 11)
+
 	// Enriched
-	PlanType     string  `json:"plan_type"` 
-	IsHighSpec   bool    `json:"is_high_spec"`
+	PlanType   string `json:"plan_type"`
+	IsHighSpec bool   `json:"is_high_spec"`
 }
 
 type GroupedResult struct {
@@ -49,6 +48,7 @@ type GroupedResult struct {
 	Year            int      `json:"year"`
 	Condition       string   `json:"condition"`
 	BodyType        string   `json:"body_type"`
+	Tier            string   `json:"tier"`
 	PlanType        string   `json:"plan_type"`
 	MonthlyFee      float64  `json:"monthly_fee"`
 	StarterFee      float64  `json:"starter_fee"`
@@ -57,12 +57,13 @@ type GroupedResult struct {
 }
 
 type SearchRequest struct {
-	City           string  `json:"city"`
-	Query          string  `json:"query"`
-	MaxPrice       float64 `json:"max_price"`
-	Color          string  `json:"color"`
-	Condition      string  `json:"condition"`
-    // Intention REMOVED as logic is now prompt-driven
+	City      string  `json:"city"`
+	Query     string  `json:"query"`
+	MaxPrice  float64 `json:"max_price"`
+	Color     string  `json:"color"`
+	Condition string  `json:"condition"`
+	Tier      string  `json:"tier"`      // e.g. "Midsize Sedan"
+	BodyType  string  `json:"body_type"` // e.g. "Sedan"
 }
 
 type InventoryCache struct {
@@ -70,6 +71,7 @@ type InventoryCache struct {
 	ExpiresAt time.Time
 	Mu        sync.RWMutex
 }
+
 var globalCache InventoryCache
 
 // --- Helpers ---
@@ -89,34 +91,41 @@ func cleanYear(s string) int {
 // --- Loader ---
 func loadCarsFromURL(url string) ([]Car, error) {
 	resp, err := http.Get(url)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	reader := csv.NewReader(resp.Body)
 	reader.FieldsPerRecord = -1
 	records, err := reader.ReadAll()
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
 	var loaded []Car
 	for i, row := range records {
-        // Adjust check based on your CSV structure (11 columns used)
-		if i == 0 || len(row) < 11 { continue } 
+		// New Sheet has 12 columns: 0-11
+		// 0:country, 1:city, 2:brand, 3:model, 4:year, 5:trim, 6:color, 7:starter, 8:monthly, 9:condition, 10:Tier, 11:body_type
+		if i == 0 || len(row) < 12 {
+			continue
+		}
 
 		c := Car{
-			Country:      row[0],
-			City:         strings.TrimSpace(row[1]),
-			Brand:        strings.TrimSpace(row[2]),
-			Model:        strings.TrimSpace(row[3]),
-			Year:         cleanYear(row[4]),
-			Trim:         strings.TrimSpace(row[5]),
-			Color:        strings.TrimSpace(row[6]),
-			StarterFee:   cleanPrice(row[7]),
-			MonthlyFee:   cleanPrice(row[8]),
-			Condition:    strings.ToUpper(row[9]),
-            // Column 10 is BodyType in your PDF/CSV snippet
-			BodyType:     strings.TrimSpace(row[10]),
-            
-            PlanType:     "Subscribe to Own", 
+			Country:    row[0],
+			City:       strings.TrimSpace(row[1]),
+			Brand:      strings.TrimSpace(row[2]),
+			Model:      strings.TrimSpace(row[3]),
+			Year:       cleanYear(row[4]),
+			Trim:       strings.TrimSpace(row[5]),
+			Color:      strings.TrimSpace(row[6]),
+			StarterFee: cleanPrice(row[7]),
+			MonthlyFee: cleanPrice(row[8]),
+			Condition:  strings.ToUpper(row[9]),
+			Tier:       strings.TrimSpace(row[10]), // New Column
+			BodyType:   strings.TrimSpace(row[11]), // New Column
+
+			PlanType: "Subscribe to Own",
 		}
 
 		trimUpper := strings.ToUpper(c.Trim)
@@ -134,11 +143,15 @@ func getInventory() ([]Car, error) {
 	expiry := globalCache.ExpiresAt
 	globalCache.Mu.RUnlock()
 
-	if len(cached) > 0 && time.Now().Before(expiry) { return cached, nil }
+	if len(cached) > 0 && time.Now().Before(expiry) {
+		return cached, nil
+	}
 
 	freshCars, err := loadCarsFromURL(CSV_URL)
 	if err != nil {
-		if len(cached) > 0 { return cached, nil }
+		if len(cached) > 0 {
+			return cached, nil
+		}
 		return nil, err
 	}
 	globalCache.Mu.Lock()
@@ -148,17 +161,24 @@ func getInventory() ([]Car, error) {
 	return freshCars, nil
 }
 
-// --- FILTERING ---
+// --- FILTERING (THE HYBRID ENGINE) ---
 
 func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, string) {
 	reqCity := strings.ToLower(strings.TrimSpace(req.City))
 	reqQuery := strings.ToLower(strings.TrimSpace(req.Query))
 	reqCond := strings.ToUpper(strings.TrimSpace(req.Condition))
+	reqBody := strings.ToLower(strings.TrimSpace(req.BodyType))
+	reqTier := strings.ToLower(strings.TrimSpace(req.Tier))
 
+	// --- PHASE 0: Base Filtering (City & Condition) ---
 	var baseSet []Car
 	for _, car := range inventory {
-		if strings.ToLower(car.City) != reqCity { continue }
-		if reqCond != "" && car.Condition != reqCond { continue }
+		if strings.ToLower(car.City) != reqCity {
+			continue
+		}
+		if reqCond != "" && car.Condition != reqCond {
+			continue
+		}
 		baseSet = append(baseSet, car)
 	}
 
@@ -166,47 +186,111 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		return nil, "No Cars Found", "I'm sorry, we currently have no cars available in " + req.City + "."
 	}
 
-	// Layer 1: Ideal Match
+	// --- PHASE 1: The "Ideal Match" (Specific Query or Strict Tier) ---
 	var layer1 []Car
 	for _, car := range baseSet {
-		if reqQuery != "" {
-            // Check Brand or Model
-			fullText := strings.ToLower(car.Brand + " " + car.Model + " " + car.BodyType)
-			if !strings.Contains(fullText, reqQuery) { continue }
+		match := true
+
+		// A. Strict Tier/Body Logic (If provided)
+		if reqTier != "" && strings.ToLower(car.Tier) != reqTier {
+			match = false
 		}
-		if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice { continue }
-		layer1 = append(layer1, car)
+		if reqBody != "" && strings.ToLower(car.BodyType) != reqBody {
+			match = false
+		}
+
+		// B. Text Query Logic (If provided)
+		if reqQuery != "" {
+			fullText := strings.ToLower(car.Brand + " " + car.Model)
+			if !strings.Contains(fullText, reqQuery) {
+				match = false
+			}
+		}
+
+		// C. Price Logic
+		if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice {
+			match = false
+		}
+
+		if match {
+			layer1 = append(layer1, car)
+		}
 	}
+
 	if len(layer1) > 0 {
 		return groupResults(layer1), "Ideal Match Found", "Great news! I found exactly what you're looking for."
 	}
 
-	// Layer 2: Budget Match
-	if req.MaxPrice > 0 {
-		var layer3 []Car
-		for _, car := range baseSet {
-			if car.MonthlyFee <= req.MaxPrice { layer3 = append(layer3, car) }
-		}
-		sort.Slice(layer3, func(i, j int) bool { return layer3[i].MonthlyFee > layer3[j].MonthlyFee })
-		if len(layer3) > 0 {
-			return groupResults(layer3), "Budget Match Found", "I found these options that fit perfectly within your monthly budget."
+	// --- PHASE 1.5: The "Smart Fallback" (Category Pivot) ---
+	// If the specific car (e.g. Mazda 6) is missing, do we have ANY cars of that BodyType?
+	var smartFallback []Car
+	availableTiers := make(map[string]bool)
+	targetBodyType := reqBody
+
+	// Infer body type from Tier if reqBody is missing but Tier is present
+	if targetBodyType == "" && reqTier != "" {
+		if strings.Contains(reqTier, "sedan") {
+			targetBodyType = "sedan"
+		} else if strings.Contains(reqTier, "suv") {
+			targetBodyType = "suv"
 		}
 	}
 
-	// Layer 3: Upsell / Fallback
+	if targetBodyType != "" {
+		for _, car := range baseSet {
+			if strings.ToLower(car.BodyType) == targetBodyType {
+				smartFallback = append(smartFallback, car)
+				availableTiers[car.Tier] = true
+			}
+		}
+	}
+
+	if len(smartFallback) > 0 {
+		// Calculate Stats for the Hint
+		var tiersList []string
+		minPrice := 99999.0
+
+		for t := range availableTiers {
+			tiersList = append(tiersList, t)
+		}
+		for _, car := range smartFallback {
+			if car.MonthlyFee < minPrice {
+				minPrice = car.MonthlyFee
+			}
+		}
+
+		// Return the Hint Message
+		msg := fmt.Sprintf("The specific car isn't available, but we have these '%s' options in %s (%v) starting from %.0f SAR/month. Please ask the user to choose a Tier or check their budget.",
+			targetBodyType, req.City, strings.Join(tiersList, ", "), minPrice)
+
+		// We return the fallback list so the Agent *could* use it, but the message guides the conversation.
+		return groupResults(smartFallback), "Category Match Found", msg
+	}
+
+	// --- PHASE 2: Budget Match (Legacy) ---
+	if req.MaxPrice > 0 {
+		var layer2 []Car
+		for _, car := range baseSet {
+			if car.MonthlyFee <= req.MaxPrice {
+				layer2 = append(layer2, car)
+			}
+		}
+		sort.Slice(layer2, func(i, j int) bool { return layer2[i].MonthlyFee > layer2[j].MonthlyFee })
+
+		if len(layer2) > 0 {
+			return groupResults(layer2), "Budget Match Found", "I couldn't find that specific type, but I found these options within your budget."
+		}
+	}
+
+	// --- PHASE 3: Upsell / Absolute Fallback (Legacy) ---
 	sort.Slice(baseSet, func(i, j int) bool { return baseSet[i].MonthlyFee < baseSet[j].MonthlyFee })
 	upsell := baseSet
-	// Increase limit to 20 so the Agent can find "Similar Tier" cars that are more expensive than the cheapest ones
-	if len(upsell) > 20 { upsell = upsell[:20] } 
-	msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but here are our available options.", req.MaxPrice)
+	if len(upsell) > 20 {
+		upsell = upsell[:20]
+	}
+
+	msg := fmt.Sprintf("I don't have anything within your criteria, but here are our available options starting from %.0f/month.", upsell[0].MonthlyFee)
 	return groupResults(upsell), "Upsell Options Found", msg
-	
-	// Layer 3: Upsell
-	// sort.Slice(baseSet, func(i, j int) bool { return baseSet[i].MonthlyFee < baseSet[j].MonthlyFee })
-	// upsell := baseSet
-	// if len(upsell) > 3 { upsell = upsell[:3] }
-	// msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but my options start from %.0f/month.", req.MaxPrice, upsell[0].MonthlyFee)
-	// return groupResults(upsell), "Upsell Options Found", msg
 }
 
 func groupResults(cars []Car) []GroupedResult {
@@ -214,10 +298,13 @@ func groupResults(cars []Car) []GroupedResult {
 	var order []string
 
 	for _, car := range cars {
+		// Key now includes BodyType to prevent merging different types
 		key := fmt.Sprintf("%s-%s-%d-%s-%.0f", car.Brand, car.Model, car.Year, car.Condition, car.MonthlyFee)
 		if _, exists := grouped[key]; !exists {
 			feat := ""
-			if car.IsHighSpec { feat += "High Spec " }
+			if car.IsHighSpec {
+				feat += "High Spec "
+			}
 
 			grouped[key] = &GroupedResult{
 				Description:     fmt.Sprintf("%s %s %d", car.Brand, car.Model, car.Year),
@@ -226,6 +313,7 @@ func groupResults(cars []Car) []GroupedResult {
 				Year:            car.Year,
 				Condition:       car.Condition,
 				BodyType:        car.BodyType,
+				Tier:            car.Tier,
 				PlanType:        car.PlanType,
 				MonthlyFee:      car.MonthlyFee,
 				StarterFee:      car.StarterFee,
@@ -236,14 +324,20 @@ func groupResults(cars []Car) []GroupedResult {
 		}
 		isNew := true
 		for _, c := range grouped[key].AvailableColors {
-			if c == car.Color { isNew = false; break }
+			if c == car.Color {
+				isNew = false
+				break
+			}
 		}
-		if isNew { grouped[key].AvailableColors = append(grouped[key].AvailableColors, car.Color) }
+		if isNew {
+			grouped[key].AvailableColors = append(grouped[key].AvailableColors, car.Color)
+		}
 	}
 
 	var results []GroupedResult
-	for _, key := range order { results = append(results, *grouped[key]) }
-	// if len(results) > 3 { results = results[:3] }
+	for _, key := range order {
+		results = append(results, *grouped[key])
+	}
 	return results
 }
 
@@ -270,7 +364,11 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	_, err := getInventory()
-	if err != nil { log.Println("Init Error:", err) } else { log.Println("Inventory Loaded.") }
+	if err != nil {
+		log.Println("Init Error:", err)
+	} else {
+		log.Println("Inventory Loaded.")
+	}
 	http.HandleFunc("/search", SearchHandler)
 	log.Println("Service running on :8889")
 	log.Fatal(http.ListenAndServe(":8889", nil))
@@ -294,7 +392,7 @@ func main() {
 // // --- Configuration ---
 // const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20z999"
 
-// // REPLACE WITH YOUR ACTUAL SHEET URL
+// // YOUR LIVE SHEET URL
 // const CSV_URL = "https://docs.google.com/spreadsheets/d/16akbI2qWPMuUwdd73h2YXHnaVgZDVuJ99z83hYCeZ1U/export?format=csv"
 
 // const CACHE_TTL = 1 * time.Minute
@@ -311,9 +409,8 @@ func main() {
 // 	StarterFee   float64 `json:"starter_fee"`
 // 	MonthlyFee   float64 `json:"monthly_fee"`
 // 	Condition    string  `json:"car_condition"`
-// 	Availability string  `json:"availability"`
-// 	Seats        string  `json:"seating_capacity"`
-// 	BestFor      string  `json:"best_for"`
+//     // Availability, Seats, BestFor REMOVED as per instruction
+// 	// BodyType is now mapped from the correct column index
 // 	BodyType     string  `json:"body_type"`
 	
 // 	// Enriched
@@ -333,16 +430,15 @@ func main() {
 // 	StarterFee      float64  `json:"starter_fee"`
 // 	AvailableColors []string `json:"available_colors"`
 // 	Features        string   `json:"features"`
-// 	BestFor         string   `json:"best_for"`
 // }
 
 // type SearchRequest struct {
 // 	City           string  `json:"city"`
 // 	Query          string  `json:"query"`
-// 	Intention      string  `json:"intention"`
 // 	MaxPrice       float64 `json:"max_price"`
 // 	Color          string  `json:"color"`
 // 	Condition      string  `json:"condition"`
+//     // Intention REMOVED as logic is now prompt-driven
 // }
 
 // type InventoryCache struct {
@@ -379,7 +475,8 @@ func main() {
 
 // 	var loaded []Car
 // 	for i, row := range records {
-// 		if i == 0 || len(row) < 14 { continue }
+//         // Adjust check based on your CSV structure (11 columns used)
+// 		if i == 0 || len(row) < 11 { continue } 
 
 // 		c := Car{
 // 			Country:      row[0],
@@ -392,12 +489,9 @@ func main() {
 // 			StarterFee:   cleanPrice(row[7]),
 // 			MonthlyFee:   cleanPrice(row[8]),
 // 			Condition:    strings.ToUpper(row[9]),
-// 			Availability: strings.TrimSpace(row[10]),
-// 			Seats:        strings.TrimSpace(row[11]),
-// 			BestFor:      strings.TrimSpace(row[12]),
-// 			BodyType:     strings.TrimSpace(row[13]),
+//             // Column 10 is BodyType in your PDF/CSV snippet
+// 			BodyType:     strings.TrimSpace(row[10]),
             
-//             // CRITICAL: Force all inventory to STO Logic
 //             PlanType:     "Subscribe to Own", 
 // 		}
 
@@ -431,19 +525,6 @@ func main() {
 // }
 
 // // --- FILTERING ---
-// func matchIntention(car Car, intention string) bool {
-// 	if intention == "" || intention == "none" { return true }
-// 	bestFor := strings.ToLower(car.BestFor)
-// 	body := strings.ToLower(car.BodyType)
-// 	switch intention {
-// 	case "family": return strings.Contains(car.Seats, "7") || strings.Contains(bestFor, "family")
-// 	case "desert": return strings.Contains(body, "suv") || strings.Contains(bestFor, "adventure")
-// 	case "budget": return strings.Contains(bestFor, "budget") || strings.Contains(bestFor, "city")
-// 	case "luxury": return car.IsHighSpec || car.MonthlyFee > 3000
-// 	case "travel": return strings.Contains(bestFor, "comfort") || strings.Contains(bestFor, "travel")
-// 	}
-// 	return true
-// }
 
 // func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, string) {
 // 	reqCity := strings.ToLower(strings.TrimSpace(req.City))
@@ -452,10 +533,8 @@ func main() {
 
 // 	var baseSet []Car
 // 	for _, car := range inventory {
-// 		if strings.ToLower(car.Availability) != "available" { continue }
 // 		if strings.ToLower(car.City) != reqCity { continue }
 // 		if reqCond != "" && car.Condition != reqCond { continue }
-// 		// Removed "PlanPreference" logic. All cars are valid.
 // 		baseSet = append(baseSet, car)
 // 	}
 
@@ -467,31 +546,18 @@ func main() {
 // 	var layer1 []Car
 // 	for _, car := range baseSet {
 // 		if reqQuery != "" {
+//             // Check Brand or Model
 // 			fullText := strings.ToLower(car.Brand + " " + car.Model + " " + car.BodyType)
 // 			if !strings.Contains(fullText, reqQuery) { continue }
 // 		}
 // 		if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice { continue }
-// 		if !matchIntention(car, req.Intention) { continue }
 // 		layer1 = append(layer1, car)
 // 	}
 // 	if len(layer1) > 0 {
 // 		return groupResults(layer1), "Ideal Match Found", "Great news! I found exactly what you're looking for."
 // 	}
 
-// 	// Layer 2: Smart Swap
-// 	if reqQuery != "" || req.Intention != "" {
-// 		var layer2 []Car
-// 		for _, car := range baseSet {
-// 			if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice { continue }
-// 			if !matchIntention(car, req.Intention) { continue }
-// 			layer2 = append(layer2, car)
-// 		}
-// 		if len(layer2) > 0 {
-// 			return groupResults(layer2), "Alternative Suggestions Found", "I couldn't find that specific model, but I found these excellent alternatives."
-// 		}
-// 	}
-
-// 	// Layer 3: Budget Match
+// 	// Layer 2: Budget Match
 // 	if req.MaxPrice > 0 {
 // 		var layer3 []Car
 // 		for _, car := range baseSet {
@@ -503,12 +569,20 @@ func main() {
 // 		}
 // 	}
 
-// 	// Layer 4: Upsell
+// 	// Layer 3: Upsell / Fallback
 // 	sort.Slice(baseSet, func(i, j int) bool { return baseSet[i].MonthlyFee < baseSet[j].MonthlyFee })
 // 	upsell := baseSet
-// 	if len(upsell) > 3 { upsell = upsell[:3] }
-// 	msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but my options start from %.0f/month.", req.MaxPrice, upsell[0].MonthlyFee)
+// 	// Increase limit to 20 so the Agent can find "Similar Tier" cars that are more expensive than the cheapest ones
+// 	if len(upsell) > 20 { upsell = upsell[:20] } 
+// 	msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but here are our available options.", req.MaxPrice)
 // 	return groupResults(upsell), "Upsell Options Found", msg
+	
+// 	// Layer 3: Upsell
+// 	// sort.Slice(baseSet, func(i, j int) bool { return baseSet[i].MonthlyFee < baseSet[j].MonthlyFee })
+// 	// upsell := baseSet
+// 	// if len(upsell) > 3 { upsell = upsell[:3] }
+// 	// msg := fmt.Sprintf("I don't have anything within your budget of %.0f, but my options start from %.0f/month.", req.MaxPrice, upsell[0].MonthlyFee)
+// 	// return groupResults(upsell), "Upsell Options Found", msg
 // }
 
 // func groupResults(cars []Car) []GroupedResult {
@@ -520,7 +594,6 @@ func main() {
 // 		if _, exists := grouped[key]; !exists {
 // 			feat := ""
 // 			if car.IsHighSpec { feat += "High Spec " }
-// 			if strings.Contains(car.Seats, "7") { feat += "7-Seater " }
 
 // 			grouped[key] = &GroupedResult{
 // 				Description:     fmt.Sprintf("%s %s %d", car.Brand, car.Model, car.Year),
@@ -534,7 +607,6 @@ func main() {
 // 				StarterFee:      car.StarterFee,
 // 				AvailableColors: []string{},
 // 				Features:        strings.TrimSpace(feat),
-// 				BestFor:         car.BestFor,
 // 			}
 // 			order = append(order, key)
 // 		}
@@ -547,7 +619,7 @@ func main() {
 
 // 	var results []GroupedResult
 // 	for _, key := range order { results = append(results, *grouped[key]) }
-// 	if len(results) > 3 { results = results[:3] }
+// 	// if len(results) > 3 { results = results[:3] }
 // 	return results
 // }
 
