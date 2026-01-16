@@ -16,7 +16,7 @@ import (
 // --- Configuration ---
 const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20z999"
 
-// UPDATED SHEET URL (Using export format for direct CSV access)
+// UPDATED SHEET URL 
 const CSV_URL = "https://docs.google.com/spreadsheets/d/1gds7nkXI6pPY_mCb1_55AoagcRU87ZnaWMYQN9YPDFA/export?format=csv"
 
 const CACHE_TTL = 1 * time.Minute
@@ -48,7 +48,7 @@ type GroupedResult struct {
 	Year            int      `json:"year"`
 	Condition       string   `json:"condition"`
 	BodyType        string   `json:"body_type"`
-	Tier            string   `json:"tier"`
+	Tier            string   `json:"tier"` // <--- CRITICAL: This must be here
 	PlanType        string   `json:"plan_type"`
 	MonthlyFee      float64  `json:"monthly_fee"`
 	StarterFee      float64  `json:"starter_fee"`
@@ -105,7 +105,6 @@ func loadCarsFromURL(url string) ([]Car, error) {
 
 	var loaded []Car
 	for i, row := range records {
-		// New Sheet has 12 columns: 0-11
 		// 0:country, 1:city, 2:brand, 3:model, 4:year, 5:trim, 6:color, 7:starter, 8:monthly, 9:condition, 10:Tier, 11:body_type
 		if i == 0 || len(row) < 12 {
 			continue
@@ -122,8 +121,8 @@ func loadCarsFromURL(url string) ([]Car, error) {
 			StarterFee: cleanPrice(row[7]),
 			MonthlyFee: cleanPrice(row[8]),
 			Condition:  strings.ToUpper(row[9]),
-			Tier:       strings.TrimSpace(row[10]), // New Column
-			BodyType:   strings.TrimSpace(row[11]), // New Column
+			Tier:       strings.TrimSpace(row[10]), 
+			BodyType:   strings.TrimSpace(row[11]), 
 
 			PlanType: "Subscribe to Own",
 		}
@@ -161,7 +160,7 @@ func getInventory() ([]Car, error) {
 	return freshCars, nil
 }
 
-// --- FILTERING (THE HYBRID ENGINE) ---
+// --- FILTERING ---
 
 func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, string) {
 	reqCity := strings.ToLower(strings.TrimSpace(req.City))
@@ -170,7 +169,7 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 	reqBody := strings.ToLower(strings.TrimSpace(req.BodyType))
 	reqTier := strings.ToLower(strings.TrimSpace(req.Tier))
 
-	// --- PHASE 0: Base Filtering (City & Condition) ---
+	// --- PHASE 0: Base Filtering ---
 	var baseSet []Car
 	for _, car := range inventory {
 		if strings.ToLower(car.City) != reqCity {
@@ -186,28 +185,26 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		return nil, "No Cars Found", "I'm sorry, we currently have no cars available in " + req.City + "."
 	}
 
-	// --- PHASE 1: The "Ideal Match" (Specific Query or Strict Tier) ---
+	// --- PHASE 1: Ideal Match ---
 	var layer1 []Car
 	for _, car := range baseSet {
 		match := true
 
-		// A. Strict Tier/Body Logic (If provided)
+		// Strict Tier/Body Logic
 		if reqTier != "" && strings.ToLower(car.Tier) != reqTier {
 			match = false
 		}
 		if reqBody != "" && strings.ToLower(car.BodyType) != reqBody {
 			match = false
 		}
-
-		// B. Text Query Logic (If provided)
+		// Query Logic
 		if reqQuery != "" {
 			fullText := strings.ToLower(car.Brand + " " + car.Model)
 			if !strings.Contains(fullText, reqQuery) {
 				match = false
 			}
 		}
-
-		// C. Price Logic
+		// Price Logic
 		if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice {
 			match = false
 		}
@@ -221,13 +218,12 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		return groupResults(layer1), "Ideal Match Found", "Great news! I found exactly what you're looking for."
 	}
 
-	// --- PHASE 1.5: The "Smart Fallback" (Category Pivot) ---
-	// If the specific car (e.g. Mazda 6) is missing, do we have ANY cars of that BodyType?
+	// --- PHASE 1.5: Smart Fallback ---
 	var smartFallback []Car
 	availableTiers := make(map[string]bool)
 	targetBodyType := reqBody
 
-	// Infer body type from Tier if reqBody is missing but Tier is present
+	// Inference
 	if targetBodyType == "" && reqTier != "" {
 		if strings.Contains(reqTier, "sedan") {
 			targetBodyType = "sedan"
@@ -246,10 +242,8 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 	}
 
 	if len(smartFallback) > 0 {
-		// Calculate Stats for the Hint
 		var tiersList []string
 		minPrice := 99999.0
-
 		for t := range availableTiers {
 			tiersList = append(tiersList, t)
 		}
@@ -258,16 +252,13 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 				minPrice = car.MonthlyFee
 			}
 		}
-
-		// Return the Hint Message
 		msg := fmt.Sprintf("The specific car isn't available, but we have these '%s' options in %s (%v) starting from %.0f SAR/month. Please ask the user to choose a Tier or check their budget.",
 			targetBodyType, req.City, strings.Join(tiersList, ", "), minPrice)
 
-		// We return the fallback list so the Agent *could* use it, but the message guides the conversation.
 		return groupResults(smartFallback), "Category Match Found", msg
 	}
 
-	// --- PHASE 2: Budget Match (Legacy) ---
+	// --- PHASE 2: Budget Match ---
 	if req.MaxPrice > 0 {
 		var layer2 []Car
 		for _, car := range baseSet {
@@ -282,7 +273,7 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		}
 	}
 
-	// --- PHASE 3: Upsell / Absolute Fallback (Legacy) ---
+	// --- PHASE 3: Upsell ---
 	sort.Slice(baseSet, func(i, j int) bool { return baseSet[i].MonthlyFee < baseSet[j].MonthlyFee })
 	upsell := baseSet
 	if len(upsell) > 20 {
@@ -298,7 +289,6 @@ func groupResults(cars []Car) []GroupedResult {
 	var order []string
 
 	for _, car := range cars {
-		// Key now includes BodyType to prevent merging different types
 		key := fmt.Sprintf("%s-%s-%d-%s-%.0f", car.Brand, car.Model, car.Year, car.Condition, car.MonthlyFee)
 		if _, exists := grouped[key]; !exists {
 			feat := ""
@@ -313,7 +303,7 @@ func groupResults(cars []Car) []GroupedResult {
 				Year:            car.Year,
 				Condition:       car.Condition,
 				BodyType:        car.BodyType,
-				Tier:            car.Tier,
+				Tier:            car.Tier, // Ensure this is mapped!
 				PlanType:        car.PlanType,
 				MonthlyFee:      car.MonthlyFee,
 				StarterFee:      car.StarterFee,
@@ -373,7 +363,6 @@ func main() {
 	log.Println("Service running on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
-
 // package main
 
 // import (
