@@ -19,7 +19,7 @@ const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20z99
 // UPDATED SHEET URL 
 const CSV_URL = "https://docs.google.com/spreadsheets/d/1gds7nkXI6pPY_mCb1_55AoagcRU87ZnaWMYQN9YPDFA/export?format=csv"
 
-const CACHE_TTL = 1 * time.Minute
+const CACHE_TTL = 60 * time.Minute
 
 // --- Data Models ---
 type Car struct {
@@ -199,7 +199,8 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		}
 		// Query Logic
 		if reqQuery != "" {
-			fullText := strings.ToLower(car.Brand + " " + car.Model)
+			// fullText := strings.ToLower(car.Brand + " " + car.Model)
+			fullText := strings.ToLower(car.Brand + " " + car.Model + " " + car.BodyType)
 			if !strings.Contains(fullText, reqQuery) {
 				match = false
 			}
