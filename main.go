@@ -190,6 +190,14 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 	for _, car := range baseSet {
 		match := true
 
+		// 1. Color Logic (Conditional)
+		// Only filter by color if the user actually provided one.
+		if req.Color != "" {
+			if !strings.EqualFold(strings.TrimSpace(car.Color), strings.TrimSpace(req.Color)) {
+				match = false
+			}
+		}
+
 		// Strict Tier/Body Logic
 		if reqTier != "" && strings.ToLower(car.Tier) != reqTier {
 			match = false
@@ -364,6 +372,7 @@ func main() {
 	log.Println("Service running on :8889")
 	log.Fatal(http.ListenAndServe(":8889", nil))
 }
+
 // package main
 
 // import (
