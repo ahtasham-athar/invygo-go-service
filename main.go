@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -14,7 +15,15 @@ import (
 )
 
 // --- Configuration ---
-const API_KEY = "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20z999"
+// API key is read from env to avoid leaking it in source control.
+// Set INVYGO_API_KEY in your environment.
+// TEST_API_KEY is used by unit tests as a stable client key.
+// It is NOT used by the server for authentication.
+const TEST_API_KEY = "test-api-key"
+
+func apiKey() string {
+	return strings.TrimSpace(os.Getenv("INVYGO_API_KEY"))
+}
 
 // UPDATED SHEET URL 
 const CSV_URL = "https://docs.google.com/spreadsheets/d/1gds7nkXI6pPY_mCb1_55AoagcRU87ZnaWMYQN9YPDFA/export?format=csv"
@@ -48,7 +57,7 @@ type GroupedResult struct {
 	Year            int      `json:"year"`
 	Condition       string   `json:"condition"`
 	BodyType        string   `json:"body_type"`
-	Tier            string   `json:"tier"` // <--- CRITICAL: This must be here
+	Tier            string   `json:"tier"` 
 	PlanType        string   `json:"plan_type"`
 	MonthlyFee      float64  `json:"monthly_fee"`
 	StarterFee      float64  `json:"starter_fee"`
@@ -105,7 +114,6 @@ func loadCarsFromURL(url string) ([]Car, error) {
 
 	var loaded []Car
 	for i, row := range records {
-		// 0:country, 1:city, 2:brand, 3:model, 4:year, 5:trim, 6:color, 7:starter, 8:monthly, 9:condition, 10:Tier, 11:body_type
 		if i == 0 || len(row) < 12 {
 			continue
 		}
@@ -120,7 +128,7 @@ func loadCarsFromURL(url string) ([]Car, error) {
 			Color:      strings.TrimSpace(row[6]),
 			StarterFee: cleanPrice(row[7]),
 			MonthlyFee: cleanPrice(row[8]),
-			Condition:  strings.ToUpper(row[9]),
+			Condition: strings.ToUpper(strings.TrimSpace(row[9])), // Store raw, compare with EqualFold
 			Tier:       strings.TrimSpace(row[10]), 
 			BodyType:   strings.TrimSpace(row[11]), 
 
@@ -163,19 +171,19 @@ func getInventory() ([]Car, error) {
 // --- FILTERING ---
 
 func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, string) {
-	reqCity := strings.ToLower(strings.TrimSpace(req.City))
+	reqCity := strings.TrimSpace(req.City)
 	reqQuery := strings.ToLower(strings.TrimSpace(req.Query))
-	reqCond := strings.ToUpper(strings.TrimSpace(req.Condition))
-	reqBody := strings.ToLower(strings.TrimSpace(req.BodyType))
-	reqTier := strings.ToLower(strings.TrimSpace(req.Tier))
+	reqCond := strings.TrimSpace(req.Condition)
+	reqBody := strings.TrimSpace(req.BodyType)
+	reqTier := strings.TrimSpace(req.Tier)
 
 	// --- PHASE 0: Base Filtering ---
 	var baseSet []Car
 	for _, car := range inventory {
-		if strings.ToLower(car.City) != reqCity {
+		if !strings.EqualFold(car.City, reqCity) {
 			continue
 		}
-		if reqCond != "" && car.Condition != reqCond {
+		if reqCond != "" && !strings.EqualFold(car.Condition, reqCond) {
 			continue
 		}
 		baseSet = append(baseSet, car)
@@ -190,30 +198,30 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 	for _, car := range baseSet {
 		match := true
 
-		// 1. Color Logic (Conditional)
-		// Only filter by color if the user actually provided one.
+		// 1. Color Logic
 		if req.Color != "" {
 			if !strings.EqualFold(strings.TrimSpace(car.Color), strings.TrimSpace(req.Color)) {
 				match = false
 			}
 		}
 
-		// Strict Tier/Body Logic
-		if reqTier != "" && strings.ToLower(car.Tier) != reqTier {
+		// 2. Tier/Body Logic with EqualFold
+		if reqTier != "" && !strings.EqualFold(car.Tier, reqTier) {
 			match = false
 		}
-		if reqBody != "" && strings.ToLower(car.BodyType) != reqBody {
+		if reqBody != "" && !strings.EqualFold(car.BodyType, reqBody) {
 			match = false
 		}
-		// Query Logic
+
+		// 3. Query Logic
 		if reqQuery != "" {
-			// fullText := strings.ToLower(car.Brand + " " + car.Model)
 			fullText := strings.ToLower(car.Brand + " " + car.Model + " " + car.BodyType)
 			if !strings.Contains(fullText, reqQuery) {
 				match = false
 			}
 		}
-		// Price Logic
+
+		// 4. Price Logic
 		if req.MaxPrice > 0 && car.MonthlyFee > req.MaxPrice {
 			match = false
 		}
@@ -234,16 +242,19 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 
 	// Inference
 	if targetBodyType == "" && reqTier != "" {
-		if strings.Contains(reqTier, "sedan") {
+		lowerTier := strings.ToLower(reqTier)
+		if strings.Contains(lowerTier, "sedan") {
 			targetBodyType = "sedan"
-		} else if strings.Contains(reqTier, "suv") {
+		} else if strings.Contains(lowerTier, "suv") {
 			targetBodyType = "suv"
+		} else if strings.Contains(lowerTier, "pickup") {
+			targetBodyType = "pickup truck"
 		}
 	}
 
 	if targetBodyType != "" {
 		for _, car := range baseSet {
-			if strings.ToLower(car.BodyType) == targetBodyType {
+			if strings.EqualFold(car.BodyType, targetBodyType) {
 				smartFallback = append(smartFallback, car)
 				availableTiers[car.Tier] = true
 			}
@@ -256,12 +267,13 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		for t := range availableTiers {
 			tiersList = append(tiersList, t)
 		}
+		sort.Strings(tiersList)
 		for _, car := range smartFallback {
 			if car.MonthlyFee < minPrice {
 				minPrice = car.MonthlyFee
 			}
 		}
-		msg := fmt.Sprintf("The specific car isn't available, but we have these '%s' options in %s (%v) starting from %.0f SAR/month. Please ask the user to choose a Tier or check their budget.",
+		msg := fmt.Sprintf("The specific car isn't available, but we have these '%s' options in %s (%s) starting from %.0f SAR/month. Please ask the user to choose a Tier or check their budget.",
 			targetBodyType, req.City, strings.Join(tiersList, ", "), minPrice)
 
 		return groupResults(smartFallback), "Category Match Found", msg
@@ -298,6 +310,7 @@ func groupResults(cars []Car) []GroupedResult {
 	var order []string
 
 	for _, car := range cars {
+		// Grouping key includes condition for clarity
 		key := fmt.Sprintf("%s-%s-%d-%s-%.0f", car.Brand, car.Model, car.Year, car.Condition, car.MonthlyFee)
 		if _, exists := grouped[key]; !exists {
 			feat := ""
@@ -312,7 +325,7 @@ func groupResults(cars []Car) []GroupedResult {
 				Year:            car.Year,
 				Condition:       car.Condition,
 				BodyType:        car.BodyType,
-				Tier:            car.Tier, // Ensure this is mapped!
+				Tier:            car.Tier, 
 				PlanType:        car.PlanType,
 				MonthlyFee:      car.MonthlyFee,
 				StarterFee:      car.StarterFee,
@@ -321,9 +334,10 @@ func groupResults(cars []Car) []GroupedResult {
 			}
 			order = append(order, key)
 		}
+		
 		isNew := true
 		for _, c := range grouped[key].AvailableColors {
-			if c == car.Color {
+			if strings.EqualFold(c, car.Color) {
 				isNew = false
 				break
 			}
@@ -343,18 +357,42 @@ func groupResults(cars []Car) []GroupedResult {
 // HANDLER
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	if r.Header.Get("x-api-key") != API_KEY {
+	key := apiKey()
+	if key == "" {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":  "Error",
+			"message": "Server is not configured (missing INVYGO_API_KEY).",
+		})
+		return
+	}
+	if r.Header.Get("x-api-key") != key {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]interface{}{"error": "Unauthorized"})
 		return
 	}
 	var req SearchRequest
-	json.NewDecoder(r.Body).Decode(&req)
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"error": "Invalid request body"})
+		return
+	}
+
 	if req.City == "" {
 		json.NewEncoder(w).Encode(map[string]interface{}{"status": "Error", "message": "City is mandatory."})
 		return
 	}
-	cars, _ := getInventory()
+	cars, invErr := getInventory()
+	if invErr != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":  "Error",
+			"message": "Inventory is temporarily unavailable. Please try again in a few minutes.",
+			"error":   invErr.Error(),
+		})
+		return
+	}
 	results, status, msg := filterCars(req, cars)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"status": status, "message": msg, "results": results,
@@ -362,6 +400,9 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	if apiKey() == "" {
+		log.Fatal("Missing required environment variable: INVYGO_API_KEY")
+	}
 	_, err := getInventory()
 	if err != nil {
 		log.Println("Init Error:", err)
