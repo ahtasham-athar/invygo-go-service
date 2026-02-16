@@ -232,7 +232,7 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 	}
 
 	if len(layer1) > 0 {
-		return groupResults(layer1), "Ideal Match Found", "Great news! I found exactly what you're looking for."
+		return groupResults(layer1), "Ideal Match Found", "I have exactly what you're looking for."
 	}
 
 	// --- PHASE 1.5: Smart Fallback ---
