@@ -232,7 +232,18 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 	}
 
 	if len(layer1) > 0 {
-		return groupResults(layer1), "Ideal Match Found", "Great news! I found exactly what you're looking for."
+		grouped := groupResults(layer1)
+
+		if req.MaxPrice > 0 {
+			sort.Slice(grouped, func(i, j int) bool {
+				return grouped[i].MonthlyFee > grouped[j].MonthlyFee
+			})
+			if len(grouped) > 4 {
+				grouped = grouped[:4]
+			}
+		}
+
+		return grouped, "Ideal Match Found", "I have exactly what you're looking for."
 	}
 
 	// --- PHASE 1.5: Smart Fallback ---
@@ -273,7 +284,7 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 				minPrice = car.MonthlyFee
 			}
 		}
-		msg := fmt.Sprintf("The specific car isn't available, but we have these '%s' options in %s (%s) starting from %.0f SAR/month. Please ask the user to choose a Tier or check their budget.",
+		msg := fmt.Sprintf("The specific car isn't available, but we have these '%s' options in %s (%s) starting from %.0f/month. Please ask the user to choose a Tier or check their budget.",
 			targetBodyType, req.City, strings.Join(tiersList, ", "), minPrice)
 
 		return groupResults(smartFallback), "Category Match Found", msg
@@ -290,7 +301,14 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		sort.Slice(layer2, func(i, j int) bool { return layer2[i].MonthlyFee > layer2[j].MonthlyFee })
 
 		if len(layer2) > 0 {
-			return groupResults(layer2), "Budget Match Found", "I couldn't find that specific type, but I found these options within your budget."
+			grouped := groupResults(layer2)
+			sort.Slice(grouped, func(i, j int) bool {
+				return grouped[i].MonthlyFee > grouped[j].MonthlyFee
+			})
+			if len(grouped) > 4 {
+				grouped = grouped[:4]
+			}
+			return grouped, "Budget Match Found", "I couldn't find that specific type, but I found these options within your budget."
 		}
 	}
 
@@ -301,7 +319,7 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		upsell = upsell[:20]
 	}
 
-	msg := fmt.Sprintf("I don't have anything within your criteria, but here are our available options starting from %.0f/month.", upsell[0].MonthlyFee)
+	msg := fmt.Sprintf("I don't have anything within your requirements, but here are our available options starting from %.0f/month.", upsell[0].MonthlyFee)
 	return groupResults(upsell), "Upsell Options Found", msg
 }
 
