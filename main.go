@@ -319,7 +319,7 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 		upsell = upsell[:20]
 	}
 
-	msg := fmt.Sprintf("I don't have anything within your requirements, but here are our available options.", upsell[0].MonthlyFee)
+	msg := fmt.Sprintf("I don't have anything within your requirements, but here are our available options.")
 	return groupResults(upsell), "Upsell Options Found", msg
 }
 
