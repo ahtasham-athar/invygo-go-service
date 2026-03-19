@@ -284,7 +284,7 @@ func filterCars(req SearchRequest, inventory []Car) ([]GroupedResult, string, st
 				minPrice = car.MonthlyFee
 			}
 		}
-		msg := fmt.Sprintf("The specific car isn't available, but we have these '%s' options in %s (%s) starting from %.0f/month. Please ask the user to choose a Tier or check their budget.",
+		msg := fmt.Sprintf("The specific car isn't available, but we have these '%s' options in %s (%s). Please ask the user to choose a Tier or check their budget.",
 			targetBodyType, req.City, strings.Join(tiersList, ", "), minPrice)
 
 		return groupResults(smartFallback), "Category Match Found", msg
