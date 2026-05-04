@@ -18,8 +18,12 @@ jobs:
           script: |
             cd ~/convoi_ai/invygo-go-service
             
-            # Running your manual commands
+            # Pull latest changes
             git pull origin feature/invygo-trial
-            go build -o invygo-service
+            
+            # Build using absolute path
+            /usr/local/go/bin/go build -o invygo-service
+            
+            # Systemd management
             sudo systemctl daemon-reload
             sudo systemctl restart invygo.service
