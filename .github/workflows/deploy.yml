@@ -1,33 +1,25 @@
-name: CI/CD Deploy to EC2
+name: Deploy Invygo Service
 
 on:
   push:
-    branches: [ main ]  # Trigger on pushes to main branch
+    branches:
+      - feature/invygo-trial
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to EC2 via SSH
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.EC2_HOST_STAGING }}
+          username: ${{ secrets.EC2_USER_STAGING }}
+          key: ${{ secrets.EC2_SSH_KEY_STAGING }}
           script: |
-            # 1. Navigate to the project directory
             cd ~/convoi_ai/invygo-go-service
             
-            # 2. Pull the latest code
-            git pull origin main
-            
-            # 3. Build the Go binary (Assuming Go is installed on the EC2)
-            /usr/local/go/bin/go build -o invygo-service
-            
-            # 4. Reload and Restart Systemd service
+            # Running your manual commands
+            git pull origin feature/invygo-trial
+            go build -o invygo-service
             sudo systemctl daemon-reload
             sudo systemctl restart invygo.service
-
