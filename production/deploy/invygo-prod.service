@@ -1,0 +1,20 @@
+[Unit]
+Description=Invygo Production Inventory Service (multi-plan STO/MONTHLY/STS)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/convoi_ai/invygo-go-service
+# Reuse the existing API key from the repo .env (INVYGO_API_KEY=...)
+EnvironmentFile=/home/ubuntu/convoi_ai/invygo-go-service/.env
+# Distinct free port so it runs ALONGSIDE other services (8080/8081 are taken)
+Environment=PORT=8090
+# Sheet URL is baked in as default; uncomment to override:
+# Environment=INVYGO_SHEET_URL=https://docs.google.com/spreadsheets/d/122ODHukERmK36i0K5rI3o4lIgDAHDNL9AH6-EkKMgz4/export?format=csv
+ExecStart=/home/ubuntu/convoi_ai/invygo-go-service/invygo-prod
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
