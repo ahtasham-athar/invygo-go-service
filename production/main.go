@@ -739,8 +739,35 @@ func sortAndCap(g []GroupedResult, budget float64, isSTS bool) []GroupedResult {
 }
 
 // --- Core filter / fallback matrix ---
+// normalizeCity maps Arabic city names and common variants to the canonical English
+// sheet name, so an Arabic-speaking agent passing "الرياض" still matches "Riyadh".
+// Exact (trimmed, lower) match only — never substring, to avoid false hits.
+func normalizeCity(s string) string {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "riyadh", "الرياض", "رياض":
+		return "Riyadh"
+	case "jeddah", "jedah", "jaddah", "جدة", "جده":
+		return "Jeddah"
+	case "dammam", "الدمام", "دمام":
+		return "Dammam"
+	case "al khobar", "alkhobar", "khobar", "الخبر", "خبر":
+		return "Al Khobar"
+	case "madinah", "medina", "al madinah", "المدينة", "المدينه", "مدينة":
+		return "Madinah"
+	case "mecca", "makkah", "مكة", "مكه":
+		return "Mecca"
+	case "taif", "al taif", "الطائف", "طائف":
+		return "Taif"
+	case "arar", "عرعر":
+		return "Arar"
+	case "turayf", "turaif", "طريف":
+		return "Turayf"
+	}
+	return strings.TrimSpace(s)
+}
+
 func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) SearchResult {
-	city := strings.TrimSpace(req.City)
+	city := normalizeCity(req.City)
 	product := strings.ToUpper(strings.TrimSpace(req.Product))
 	cond := strings.ToUpper(strings.TrimSpace(req.Condition))
 	query := strings.ToLower(strings.TrimSpace(req.Query))
@@ -773,13 +800,22 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 	}
 	if len(base) == 0 {
 		// A3 — never a bare dead-end: point to where stock exists.
-		if cs := citiesWithStock(inv, product, city); len(cs) > 0 {
+		// MODEL-SCOPED: if the customer asked for a specific model/brand, only point to
+		// cities where THAT car actually exists — never plan-level cities (that would
+		// imply the requested model is available elsewhere when it isn't). Fall back to
+		// plan-level stock only when no specific model was requested.
+		var cs []string
+		if strings.TrimSpace(query) != "" {
+			cs, _ = globalAvailability(inv, query, city, product)
+		} else {
+			cs = citiesWithStock(inv, product, city)
+		}
+		if len(cs) > 0 {
 			meta["also_in_cities"] = cs
 		}
 		if ps := productsInCity(inv, city, product); len(ps) > 0 {
 			meta["also_in_products"] = ps
 		}
-		cs, _ := meta["also_in_cities"].([]string)
 		return SearchResult{Results: empty, Status: StatusNoCars, Meta: meta,
 			Message: withCitySuggestion("We currently have no cars available in "+city+planLabel(product)+".", cs)}
 	}
