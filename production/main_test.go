@@ -181,17 +181,21 @@ func TestModelInferenceFallback(t *testing.T) {
 	}
 }
 
-func TestBudgetNeededWhenNoBudget(t *testing.T) {
-	// Body type known, STO/MONTHLY, no budget -> ask, with a numeric range.
+func TestNoBudgetReturnsLadderedAlternative(t *testing.T) {
+	// Body type known, STO/MONTHLY, NO budget -> never blocks: a price-laddered Alternative
+	// with a numeric range (the retired "Budget Needed" dead-end is gone).
 	_, resp := doRequest(t, `{"city":"Riyadh","product":"MONTHLY","query":"Zzz","body_type":"Sedan"}`, TEST_API_KEY)
-	if resp["status"] != StatusBudgetNeeded {
-		t.Fatalf("expected %q, got %v", StatusBudgetNeeded, resp["status"])
+	if resp["status"] != StatusAlternative {
+		t.Fatalf("expected %q, got %v", StatusAlternative, resp["status"])
 	}
 	if _, ok := resp["price_min"]; !ok {
-		t.Error("price_min missing for Budget Needed")
+		t.Error("price_min missing")
 	}
 	if _, ok := resp["price_max"]; !ok {
-		t.Error("price_max missing for Budget Needed")
+		t.Error("price_max missing")
+	}
+	if len(results(t, resp)) == 0 {
+		t.Error("expected a laddered spread, got no results")
 	}
 }
 
@@ -251,5 +255,102 @@ func TestNoCarsForUnknownCity(t *testing.T) {
 	_, resp := doRequest(t, `{"city":"Atlantis"}`, TEST_API_KEY)
 	if resp["status"] != StatusNoCars {
 		t.Errorf("expected %q, got %v", StatusNoCars, resp["status"])
+	}
+}
+
+// ---------------- New filtering features (A1–A3, B4, B5) ----------------
+
+func TestFlexInt(t *testing.T) {
+	var s struct {
+		Y flexInt `json:"y"`
+	}
+	for _, in := range []string{`{"y":2024}`, `{"y":"2024"}`, `{"y":"2,024"}`, `{"y":"2024.0"}`} {
+		_ = json.Unmarshal([]byte(in), &s)
+		if int(s.Y) != 2024 {
+			t.Errorf("flexInt(%s) = %v, want 2024", in, int(s.Y))
+		}
+	}
+	for _, in := range []string{`{"y":null}`, `{"y":""}`, `{"y":"abc"}`} {
+		s.Y = 9
+		_ = json.Unmarshal([]byte(in), &s)
+		if int(s.Y) != 0 {
+			t.Errorf("flexInt(%s) = %v, want 0", in, int(s.Y))
+		}
+	}
+}
+
+// A3: No Cars Found must carry a concrete alternative (cities with stock).
+func TestNoCarsCarriesAlternatives(t *testing.T) {
+	_, resp := doRequest(t, `{"city":"Atlantis","product":"STO"}`, TEST_API_KEY)
+	if resp["status"] != StatusNoCars {
+		t.Fatalf("expected %q, got %v", StatusNoCars, resp["status"])
+	}
+	cs, ok := resp["also_in_cities"].([]interface{})
+	if !ok || len(cs) == 0 {
+		t.Error("No Cars Found must carry also_in_cities alternatives")
+	}
+}
+
+// A3: No Body Type Match must carry the body types we DO have.
+func TestNoBodyMatchCarriesBodyTypes(t *testing.T) {
+	_, resp := doRequest(t, `{"city":"Riyadh","product":"STO","body_type":"Van"}`, TEST_API_KEY)
+	if resp["status"] != StatusNoBodyMatch {
+		t.Skipf("Riyadh STO has Vans in snapshot (status=%v)", resp["status"])
+	}
+	bts, ok := resp["available_body_types"].([]interface{})
+	if !ok || len(bts) == 0 {
+		t.Error("No Body Type Match must carry available_body_types")
+	}
+}
+
+// B4: min_price is a hard lower bound.
+func TestMinPriceFloor(t *testing.T) {
+	_, resp := doRequest(t, `{"city":"Riyadh","product":"STO","min_price":2500}`, TEST_API_KEY)
+	for _, c := range results(t, resp) {
+		if p, _ := c["base_price"].(float64); p > 0 && p < 2500 {
+			t.Errorf("min_price=2500 leaked %v", p)
+		}
+	}
+}
+
+// B5: min_year drops older model years.
+func TestMinYearFilter(t *testing.T) {
+	_, resp := doRequest(t, `{"city":"Riyadh","product":"STO","min_year":2025}`, TEST_API_KEY)
+	for _, c := range results(t, resp) {
+		if y, _ := c["year"].(float64); y > 0 && int(y) < 2025 {
+			t.Errorf("min_year=2025 leaked %v", y)
+		}
+	}
+}
+
+// A2: condition is soft — an unmatched condition broadens (with a note) instead of dead-ending.
+func TestSoftConditionRelaxed(t *testing.T) {
+	_, resp := doRequest(t, `{"city":"Riyadh","product":"STO","query":"Zzz","body_type":"Sedan","condition":"USED","max_price":4000}`, TEST_API_KEY)
+	if st, _ := resp["status"].(string); st == StatusNoCars {
+		t.Fatalf("soft condition should not yield No Cars, got %v", st)
+	}
+	if rf, ok := resp["relaxed_filters"].([]interface{}); ok {
+		found := false
+		for _, r := range rf {
+			if r == "condition" {
+				found = true
+			}
+		}
+		if !found {
+			t.Error("relaxed_filters should include condition when condition was broadened")
+		}
+	}
+}
+
+// B4: proportional band — a car within +10% of budget is an Alternative, not Above Budget.
+func TestProportionalBand(t *testing.T) {
+	// At budget 2500 the ceiling is 2750; assert any Alternative result respects it.
+	_, resp := doRequest(t, `{"city":"Riyadh","product":"STO","query":"Zzz","body_type":"Sedan","max_price":2500}`, TEST_API_KEY)
+	if resp["status"] == StatusAlternative {
+		for _, c := range results(t, resp) {
+			if p, _ := c["base_price"].(float64); p > 2750 {
+				t.Errorf("Alternative leaked %v above ceiling 2750", p)
+			}
+		}
 	}
 }

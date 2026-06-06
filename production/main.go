@@ -45,7 +45,14 @@ const (
 )
 
 // Budget tolerance above the user's stated budget (asymmetric: below budget always allowed).
+// Proportional so it scales across price tiers; at typical 2,000–2,500 prices this is ~+200–250
+// (matching the old flat band), smaller for cheap cars and larger for premium. BUDGET_BAND_UP is
+// retained for reference only — the live band is the percentage below.
 const BUDGET_BAND_UP = 200.0
+const BUDGET_BAND_PCT = 0.10
+
+// bandCeiling is the highest price still considered "near budget" for fallback alternatives.
+func bandCeiling(budget float64) float64 { return budget * (1 + BUDGET_BAND_PCT) }
 
 // --- Data Models ---
 type Car struct {
@@ -114,11 +121,39 @@ func (f *flexFloat) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// flexInt tolerates JSON numbers, numeric strings ("2024", "2,024"), null and "".
+type flexInt int
+
+func (f *flexInt) UnmarshalJSON(b []byte) error {
+	s := strings.TrimSpace(string(b))
+	if s == "" || s == "null" || s == `""` {
+		*f = 0
+		return nil
+	}
+	s = strings.ReplaceAll(strings.Trim(s, `"`), ",", "")
+	if s == "" {
+		*f = 0
+		return nil
+	}
+	if v, err := strconv.Atoi(s); err == nil {
+		*f = flexInt(v)
+		return nil
+	}
+	if fv, err := strconv.ParseFloat(s, 64); err == nil {
+		*f = flexInt(int(fv))
+		return nil
+	}
+	*f = 0 // tolerate garbage as 0 rather than 400
+	return nil
+}
+
 type SearchRequest struct {
 	City      string    `json:"city"`
 	Query     string    `json:"query"`
 	Product   string    `json:"product"` // STO | MONTHLY | STS (optional)
 	MaxPrice  flexFloat `json:"max_price"`
+	MinPrice  flexFloat `json:"min_price"` // optional lower bound (range searches)
+	MinYear   flexInt   `json:"min_year"`  // optional "2024 or newer"
 	Color     string    `json:"color"`
 	Condition string    `json:"condition"`
 	Tier      string    `json:"tier"`
@@ -471,6 +506,112 @@ func priceRange(cars []Car) (min, max float64) {
 	return
 }
 
+// bodyTypesPresent lists the distinct body types available in a (priced) set, sorted.
+func bodyTypesPresent(cars []Car) []string {
+	set := map[string]bool{}
+	for _, c := range cars {
+		if c.BodyType != "" {
+			set[c.BodyType] = true
+		}
+	}
+	out := make([]string, 0, len(set))
+	for b := range set {
+		out = append(out, b)
+	}
+	sort.Strings(out)
+	return out
+}
+
+// cityRegion groups service cities so a "no stock here" can suggest the nearest cities first.
+var cityRegion = map[string]string{
+	"riyadh": "central",
+	"jeddah": "west", "mecca": "west", "madinah": "west", "taif": "west",
+	"dammam": "east", "al khobar": "east",
+	"arar": "north", "turayf": "north",
+}
+
+// citiesWithStock returns service cities (excluding exclCity) that have priced stock for the
+// product, ordered same-region-first so the agent can suggest the nearest alternative.
+func citiesWithStock(inv []Car, product, exclCity string) []string {
+	set := map[string]bool{}
+	for _, c := range inv {
+		if c.BasePrice <= 0 {
+			continue
+		}
+		if product != "" && !strings.EqualFold(c.Product, product) {
+			continue
+		}
+		if strings.EqualFold(c.City, exclCity) {
+			continue
+		}
+		set[c.City] = true
+	}
+	reg := cityRegion[strings.ToLower(strings.TrimSpace(exclCity))]
+	var same, other []string
+	for c := range set {
+		if reg != "" && cityRegion[strings.ToLower(c)] == reg {
+			same = append(same, c)
+		} else {
+			other = append(other, c)
+		}
+	}
+	sort.Strings(same)
+	sort.Strings(other)
+	return append(same, other...)
+}
+
+// productsInCity returns plans (excluding exclProduct) that have priced stock in the city.
+func productsInCity(inv []Car, city, exclProduct string) []string {
+	set := map[string]bool{}
+	for _, c := range inv {
+		if c.BasePrice <= 0 || !strings.EqualFold(c.City, city) {
+			continue
+		}
+		if exclProduct != "" && strings.EqualFold(c.Product, exclProduct) {
+			continue
+		}
+		set[c.Product] = true
+	}
+	out := make([]string, 0, len(set))
+	for p := range set {
+		out = append(out, p)
+	}
+	sort.Strings(out)
+	return out
+}
+
+// priceLadder returns a representative spread (cheapest, mid points, most expensive) of up to n
+// options, so a no-budget customer anchors on real prices instead of being asked for a budget.
+func priceLadder(g []GroupedResult, n int) []GroupedResult {
+	sortByPriceAsc(g)
+	if len(g) <= n || n < 2 {
+		return capN(g, n)
+	}
+	out := make([]GroupedResult, 0, n)
+	used := map[int]bool{}
+	for i := 0; i < n; i++ {
+		idx := i * (len(g) - 1) / (n - 1)
+		if used[idx] {
+			continue
+		}
+		used[idx] = true
+		out = append(out, g[idx])
+	}
+	return out
+}
+
+// withCitySuggestion appends a "I do have them in X, Y" tail when alternatives exist.
+func withCitySuggestion(msg string, cities []string) string {
+	if len(cities) == 0 {
+		return msg
+	}
+	show := cities
+	if len(show) > 3 {
+		show = show[:3]
+	}
+	return msg + " I do have them in " + strings.Join(show, ", ") + "."
+}
+
 func tierMatches(carTier, reqTier string) bool {
 	if strings.EqualFold(carTier, reqTier) {
 		return true
@@ -607,10 +748,16 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 	tier := strings.TrimSpace(req.Tier)
 	body := normalizeBodyType(req.BodyType)
 	budget := float64(req.MaxPrice)
+	minPrice := float64(req.MinPrice)
+	minYear := int(req.MinYear)
 	isSTS := product == "STS"
 	empty := []GroupedResult{}
+	meta := map[string]interface{}{}
+	priceOK := func(p float64) bool { return minPrice <= 0 || p >= minPrice }
 
-	// PHASE 0 — base set (city mandatory; product/condition optional hard filters).
+	// PHASE 0 — base set. HARD gates only: city, product, priced. (Condition is now a SOFT
+	// preference applied in Phase 1 and relaxed in fallback, so "used" never dead-ends when
+	// only new cars exist.)
 	var base []Car
 	for _, c := range inv {
 		if !strings.EqualFold(c.City, city) {
@@ -619,23 +766,34 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 		if product != "" && !strings.EqualFold(c.Product, product) {
 			continue
 		}
-		if cond != "" && !strings.EqualFold(c.Condition, cond) {
-			continue
-		}
 		if c.BasePrice <= 0 {
 			continue // never present an unpriced car (cannot be quoted)
 		}
 		base = append(base, c)
 	}
 	if len(base) == 0 {
-		return SearchResult{Results: empty, Status: StatusNoCars,
-			Message: "We currently have no cars available in " + city + planLabel(product) + "."}
+		// A3 — never a bare dead-end: point to where stock exists.
+		if cs := citiesWithStock(inv, product, city); len(cs) > 0 {
+			meta["also_in_cities"] = cs
+		}
+		if ps := productsInCity(inv, city, product); len(ps) > 0 {
+			meta["also_in_products"] = ps
+		}
+		cs, _ := meta["also_in_cities"].([]string)
+		return SearchResult{Results: empty, Status: StatusNoCars, Meta: meta,
+			Message: withCitySuggestion("We currently have no cars available in "+city+planLabel(product)+".", cs)}
 	}
 
-	// PHASE 1 — ideal match.
+	// PHASE 1 — ideal match. All preferences applied here (condition + min_year + price range).
 	var ideal []Car
 	for _, c := range base {
 		if color != "" && !strings.EqualFold(c.Color, color) {
+			continue
+		}
+		if cond != "" && !strings.EqualFold(c.Condition, cond) {
+			continue
+		}
+		if minYear > 0 && c.Year < minYear {
 			continue
 		}
 		if tier != "" && !tierMatches(c.Tier, tier) {
@@ -645,6 +803,9 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 			continue
 		}
 		if query != "" && !strings.Contains(strings.ToLower(c.Brand+" "+c.Model+" "+c.BodyType), query) {
+			continue
+		}
+		if !priceOK(c.BasePrice) {
 			continue
 		}
 		if !isSTS && budget > 0 && c.BasePrice > budget {
@@ -658,7 +819,6 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 	}
 
 	// Enrichment: where else a specifically-requested car exists.
-	meta := map[string]interface{}{}
 	if query != "" {
 		cities, products := globalAvailability(inv, query, city, product)
 		if len(cities) > 0 {
@@ -679,6 +839,10 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 	}
 
 	if target == "" {
+		// A3 — always surface the body types we DO carry here.
+		if bts := bodyTypesPresent(base); len(bts) > 0 {
+			meta["available_body_types"] = bts
+		}
 		// A segment/tier (e.g. bare "Luxury") with no in-product match and no
 		// inferable body_type: report unavailable + where it exists (no handoff).
 		if tier != "" {
@@ -692,49 +856,74 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 			return SearchResult{Results: empty, Status: StatusNoBodyMatch, Meta: meta,
 				Message: "I don't have " + tier + " options in " + city + planLabel(product) + " right now."}
 		}
-		// Unknown specific model: ask which body type to anchor on.
+		// Unknown specific model: ask which body type to anchor on (we still surface what we have).
 		if query != "" {
 			return SearchResult{Results: empty, Status: StatusNeedBodyType, Meta: meta,
 				Message: "Which body type would you like — for example sedan, SUV, or hatchback?"}
 		}
-		// Truly broad ("show me cars"): cheapest sampler.
-		return SearchResult{Results: capN(sortedAsc(groupResults(base)), 4), Status: StatusUpsell, Meta: meta,
+		// Truly broad ("show me cars"): a representative price-laddered sample.
+		return SearchResult{Results: priceLadder(groupResults(base), 4), Status: StatusUpsell, Meta: meta,
 			Message: "Here are some of our available options."}
 	}
 	meta["target_body_type"] = target
 
-	// Candidates of the anchor body_type.
+	// Candidates of the anchor body_type. Firm numeric constraints (min_year, min_price) kept;
+	// descriptive ones (color, condition) relaxed and reported via relaxed_filters.
 	var cand []Car
 	for _, c := range base {
-		if strings.EqualFold(c.BodyType, target) {
-			cand = append(cand, c)
+		if !strings.EqualFold(c.BodyType, target) {
+			continue
 		}
+		if minYear > 0 && c.Year < minYear {
+			continue
+		}
+		if !priceOK(c.BasePrice) {
+			continue
+		}
+		cand = append(cand, c)
 	}
 	if len(cand) == 0 {
+		if bts := bodyTypesPresent(base); len(bts) > 0 {
+			meta["available_body_types"] = bts
+		}
 		return SearchResult{Results: empty, Status: StatusNoBodyMatch, Meta: meta,
 			Message: "I don't have any " + target + " options in " + city + planLabel(product) + " right now."}
 	}
 
-	// STS: no ±200 band — closest weekly price (budget optional).
+	// Report descriptive filters we broadened past in this fallback.
+	var relaxed []string
+	if cond != "" {
+		relaxed = append(relaxed, "condition")
+	}
+	if color != "" {
+		relaxed = append(relaxed, "color")
+	}
+	if len(relaxed) > 0 {
+		meta["relaxed_filters"] = relaxed
+	}
+
+	// STS: no band — closest weekly price (budget optional).
 	if isSTS {
 		return SearchResult{Results: sortAndCap(groupResults(cand), budget, true),
 			Status: StatusAlternative, Meta: meta,
 			Message: "Here are " + target + " options I can offer."}
 	}
 
-	// STO / MONTHLY without budget: ask, with a real range.
+	// STO / MONTHLY, NO budget (A1+B7) — never dead-end on budget: present a price-laddered
+	// spread (cheapest → premium) so the customer reacts to real prices; the budget ask is a
+	// soft, optional hint, not a gate.
 	if budget <= 0 {
 		min, max := priceRange(cand)
 		meta["price_min"], meta["price_max"] = min, max
-		g := capN(sortedAsc(groupResults(cand)), 4)
-		return SearchResult{Results: g, Status: StatusBudgetNeeded, Meta: meta,
-			Message: fmt.Sprintf("I have several %s options from %.0f to %.0f Saudi Riyaals. What monthly budget works for you?", target, min, max)}
+		g := priceLadder(groupResults(cand), 4)
+		return SearchResult{Results: g, Status: StatusAlternative, Meta: meta,
+			Message: fmt.Sprintf("Here are a few %s options from %.0f to %.0f Saudi Riyaals — want me to narrow to a price, or shall I tell you about these?", target, min, max)}
 	}
 
-	// STO / MONTHLY with budget: asymmetric band (allow cheaper, cap at budget+200).
+	// STO / MONTHLY with budget: asymmetric proportional band (cheaper always allowed).
 	var inBand []Car
 	for _, c := range cand {
-		if c.BasePrice <= budget+BUDGET_BAND_UP {
+		if c.BasePrice <= bandCeiling(budget) {
 			inBand = append(inBand, c)
 		}
 	}
@@ -744,7 +933,7 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 		return SearchResult{Results: capN(g, 4), Status: StatusAlternative, Meta: meta,
 			Message: "Here are " + target + " options close to your budget."}
 	}
-	// Everything is above budget+200.
+	// Everything is above the band ceiling.
 	min, _ := priceRange(cand)
 	meta["cheapest"] = min
 	g := capN(sortedAsc(groupResults(cand)), 4)

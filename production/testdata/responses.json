@@ -476,15 +476,22 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "available_body_types": [
+        "Crossover",
+        "Hatchback",
+        "Pickup",
+        "SUV",
+        "Sedan"
+      ],
       "message": "Which body type would you like — for example sedan, SUV, or hatchback?",
       "results": [],
       "status": "Need Body Type"
     },
-    "raw_body": "{\"message\":\"Which body type would you like — for example sedan, SUV, or hatchback?\",\"results\":[],\"status\":\"Need Body Type\"}\n",
+    "raw_body": "{\"available_body_types\":[\"Crossover\",\"Hatchback\",\"Pickup\",\"SUV\",\"Sedan\"],\"message\":\"Which body type would you like — for example sedan, SUV, or hatchback?\",\"results\":[],\"status\":\"Need Body Type\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
-    "name": "STO. Budget needed (no budget)",
+    "name": "STO. Sedan no budget (ideal)",
     "payload": {
       "city": "Riyadh",
       "product": "STO",
@@ -590,6 +597,121 @@
       "status": "Ideal Match Found"
     },
     "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"MG 5 2025\",\"brand\":\"MG\",\"model\":\"5\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1700,\"starter_fee\":1950,\"area\":\"Khorreiss Road\",\"city\":\"Riyadh\",\"available_colors\":[\"White\",\"Silver\"],\"available_contract_lengths\":[1,24,30],\"features\":\"\"},{\"description\":\"Changan Alsvin 2024\",\"brand\":\"Changan\",\"model\":\"Alsvin\",\"year\":2024,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1775,\"starter_fee\":1975,\"area\":\"Al Uraija\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[18],\"features\":\"\"},{\"description\":\"MG 5 2024\",\"brand\":\"MG\",\"model\":\"5\",\"year\":2024,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1900,\"starter_fee\":2100,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Hyundai Accent 2025\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1900,\"starter_fee\":2175,\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[24],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "recorded_at": "0001-01-01T00:00:00Z"
+  },
+  {
+    "name": "STO. No-budget laddered alternative",
+    "payload": {
+      "city": "Riyadh",
+      "product": "STO",
+      "query": "Zzz",
+      "body_type": "Sedan"
+    },
+    "api_key_provided": true,
+    "status_code": 200,
+    "body": {
+      "message": "Here are a few Sedan options from 1700 to 2925 Saudi Riyaals — want me to narrow to a price, or shall I tell you about these?",
+      "price_max": 2925,
+      "price_min": 1700,
+      "results": [
+        {
+          "area": "Khorreiss Road",
+          "available_colors": [
+            "White",
+            "Silver"
+          ],
+          "available_contract_lengths": [
+            1,
+            24,
+            30
+          ],
+          "base_price": 1700,
+          "body_type": "Sedan",
+          "brand": "MG",
+          "city": "Riyadh",
+          "condition": "USED",
+          "description": "MG 5 2025",
+          "features": "",
+          "model": "5",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 1950,
+          "tier": "Entry level Sedan",
+          "year": 2025
+        },
+        {
+          "area": "Dhahrat Laban",
+          "available_colors": [
+            "White"
+          ],
+          "available_contract_lengths": [
+            36
+          ],
+          "base_price": 2000,
+          "body_type": "Sedan",
+          "brand": "Kia",
+          "city": "Riyadh",
+          "condition": "USED",
+          "description": "Kia Pegas 2025",
+          "features": "",
+          "model": "Pegas",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 2200,
+          "tier": "Entry level Sedan",
+          "year": 2025
+        },
+        {
+          "area": "An Nahdah",
+          "available_colors": [
+            "Silver"
+          ],
+          "available_contract_lengths": [
+            30
+          ],
+          "base_price": 2300,
+          "body_type": "Sedan",
+          "brand": "Toyota",
+          "city": "Riyadh",
+          "condition": "USED",
+          "description": "Toyota Yaris 2026",
+          "features": "",
+          "model": "Yaris",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 2550,
+          "tier": "Entry level Sedan",
+          "year": 2026
+        },
+        {
+          "area": "Al Quds",
+          "available_colors": [
+            "Silver",
+            "White",
+            "Gray"
+          ],
+          "available_contract_lengths": [
+            36
+          ],
+          "base_price": 2925,
+          "body_type": "Sedan",
+          "brand": "Hyundai",
+          "city": "Riyadh",
+          "condition": "NEW",
+          "description": "Hyundai Elantra 2026",
+          "features": "High Spec",
+          "model": "Elantra",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 1700,
+          "tier": "Midsize Sedan",
+          "year": 2026
+        }
+      ],
+      "status": "Alternative Found",
+      "target_body_type": "Sedan"
+    },
+    "raw_body": "{\"message\":\"Here are a few Sedan options from 1700 to 2925 Saudi Riyaals — want me to narrow to a price, or shall I tell you about these?\",\"price_max\":2925,\"price_min\":1700,\"results\":[{\"description\":\"MG 5 2025\",\"brand\":\"MG\",\"model\":\"5\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1700,\"starter_fee\":1950,\"area\":\"Khorreiss Road\",\"city\":\"Riyadh\",\"available_colors\":[\"White\",\"Silver\"],\"available_contract_lengths\":[1,24,30],\"features\":\"\"},{\"description\":\"Kia Pegas 2025\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2000,\"starter_fee\":2200,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Toyota Yaris 2026\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"year\":2026,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2300,\"starter_fee\":2550,\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\"],\"available_contract_lengths\":[30],\"features\":\"\"},{\"description\":\"Hyundai Elantra 2026\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2925,\"starter_fee\":1700,\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"White\",\"Gray\"],\"available_contract_lengths\":[36],\"features\":\"High Spec\"}],\"status\":\"Alternative Found\",\"target_body_type\":\"Sedan\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -723,11 +845,264 @@
         "MONTHLY",
         "STS"
       ],
+      "available_body_types": [
+        "Crossover",
+        "Hatchback",
+        "Pickup",
+        "SUV",
+        "Sedan"
+      ],
       "message": "I don't have Luxury options in Riyadh on the Subscribe to Own plan right now.",
       "results": [],
       "status": "No Body Type Match"
     },
-    "raw_body": "{\"also_in_cities\":[\"Jeddah\"],\"also_in_products\":[\"MONTHLY\",\"STS\"],\"message\":\"I don't have Luxury options in Riyadh on the Subscribe to Own plan right now.\",\"results\":[],\"status\":\"No Body Type Match\"}\n",
+    "raw_body": "{\"also_in_cities\":[\"Jeddah\"],\"also_in_products\":[\"MONTHLY\",\"STS\"],\"available_body_types\":[\"Crossover\",\"Hatchback\",\"Pickup\",\"SUV\",\"Sedan\"],\"message\":\"I don't have Luxury options in Riyadh on the Subscribe to Own plan right now.\",\"results\":[],\"status\":\"No Body Type Match\"}\n",
+    "recorded_at": "0001-01-01T00:00:00Z"
+  },
+  {
+    "name": "STO. Min price + min year",
+    "payload": {
+      "city": "Riyadh",
+      "product": "STO",
+      "min_price": 2000,
+      "min_year": 2024
+    },
+    "api_key_provided": true,
+    "status_code": 200,
+    "body": {
+      "message": "I have what you're looking for.",
+      "results": [
+        {
+          "area": "Dhahrat Laban",
+          "available_colors": [
+            "White"
+          ],
+          "available_contract_lengths": [
+            36
+          ],
+          "base_price": 2000,
+          "body_type": "Sedan",
+          "brand": "Kia",
+          "city": "Riyadh",
+          "condition": "USED",
+          "description": "Kia Pegas 2025",
+          "features": "",
+          "model": "Pegas",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 2200,
+          "tier": "Entry level Sedan",
+          "year": 2025
+        },
+        {
+          "area": "Ad Dhubbat",
+          "available_colors": [
+            "White"
+          ],
+          "available_contract_lengths": [
+            30
+          ],
+          "base_price": 2050,
+          "body_type": "Sedan",
+          "brand": "MG",
+          "city": "Riyadh",
+          "condition": "USED",
+          "description": "MG 5 2025",
+          "features": "",
+          "model": "5",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 2275,
+          "tier": "Entry level Sedan",
+          "year": 2025
+        },
+        {
+          "area": "Dhahrat Laban",
+          "available_colors": [
+            "White"
+          ],
+          "available_contract_lengths": [
+            36
+          ],
+          "base_price": 2050,
+          "body_type": "Sedan",
+          "brand": "MG",
+          "city": "Riyadh",
+          "condition": "NEW",
+          "description": "MG 5 2025",
+          "features": "",
+          "model": "5",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 2575,
+          "tier": "Entry level Sedan",
+          "year": 2025
+        },
+        {
+          "area": "An Nahdah",
+          "available_colors": [
+            "Gray"
+          ],
+          "available_contract_lengths": [
+            36
+          ],
+          "base_price": 2100,
+          "body_type": "Sedan",
+          "brand": "Kia",
+          "city": "Riyadh",
+          "condition": "NEW",
+          "description": "Kia Pegas 2025",
+          "features": "",
+          "model": "Pegas",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 2300,
+          "tier": "Entry level Sedan",
+          "year": 2025
+        }
+      ],
+      "status": "Ideal Match Found"
+    },
+    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Kia Pegas 2025\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2000,\"starter_fee\":2200,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"MG 5 2025\",\"brand\":\"MG\",\"model\":\"5\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2050,\"starter_fee\":2275,\"area\":\"Ad Dhubbat\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[30],\"features\":\"\"},{\"description\":\"MG 5 2025\",\"brand\":\"MG\",\"model\":\"5\",\"year\":2025,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2050,\"starter_fee\":2575,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Kia Pegas 2025\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2025,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2100,\"starter_fee\":2300,\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\"],\"available_contract_lengths\":[36],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "recorded_at": "0001-01-01T00:00:00Z"
+  },
+  {
+    "name": "STO. Soft condition fallback",
+    "payload": {
+      "city": "Riyadh",
+      "product": "STO",
+      "query": "Zzz",
+      "body_type": "Sedan",
+      "condition": "USED",
+      "max_price": 4000
+    },
+    "api_key_provided": true,
+    "status_code": 200,
+    "body": {
+      "message": "Here are Sedan options close to your budget.",
+      "relaxed_filters": [
+        "condition"
+      ],
+      "results": [
+        {
+          "area": "Al Quds",
+          "available_colors": [
+            "Silver",
+            "White",
+            "Gray"
+          ],
+          "available_contract_lengths": [
+            36
+          ],
+          "base_price": 2925,
+          "body_type": "Sedan",
+          "brand": "Hyundai",
+          "city": "Riyadh",
+          "condition": "NEW",
+          "description": "Hyundai Elantra 2026",
+          "features": "High Spec",
+          "model": "Elantra",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 1700,
+          "tier": "Midsize Sedan",
+          "year": 2026
+        },
+        {
+          "area": "Ar Rimal",
+          "available_colors": [
+            "Gray"
+          ],
+          "available_contract_lengths": [
+            24
+          ],
+          "base_price": 2900,
+          "body_type": "Sedan",
+          "brand": "Hyundai",
+          "city": "Riyadh",
+          "condition": "USED",
+          "description": "Hyundai Elantra 2026",
+          "features": "",
+          "model": "Elantra",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 3250,
+          "tier": "Midsize Sedan",
+          "year": 2026
+        },
+        {
+          "area": "Ar Rimal",
+          "available_colors": [
+            "Gray"
+          ],
+          "available_contract_lengths": [
+            24,
+            30
+          ],
+          "base_price": 2500,
+          "body_type": "Sedan",
+          "brand": "Hyundai",
+          "city": "Riyadh",
+          "condition": "USED",
+          "description": "Hyundai Elantra 2026",
+          "features": "",
+          "model": "Elantra",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 2875,
+          "tier": "Midsize Sedan",
+          "year": 2026
+        },
+        {
+          "area": "Dhahrat Laban",
+          "available_colors": [
+            "Silver",
+            "Gray",
+            "White"
+          ],
+          "available_contract_lengths": [
+            36
+          ],
+          "base_price": 2500,
+          "body_type": "Sedan",
+          "brand": "Hyundai",
+          "city": "Riyadh",
+          "condition": "NEW",
+          "description": "Hyundai Accent 2026",
+          "features": "",
+          "model": "Accent",
+          "price_basis": "monthly",
+          "product": "STO",
+          "starter_fee": 2700,
+          "tier": "Entry level Sedan",
+          "year": 2026
+        }
+      ],
+      "status": "Alternative Found",
+      "target_body_type": "Sedan"
+    },
+    "raw_body": "{\"message\":\"Here are Sedan options close to your budget.\",\"relaxed_filters\":[\"condition\"],\"results\":[{\"description\":\"Hyundai Elantra 2026\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2925,\"starter_fee\":1700,\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"White\",\"Gray\"],\"available_contract_lengths\":[36],\"features\":\"High Spec\"},{\"description\":\"Hyundai Elantra 2026\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"year\":2026,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2900,\"starter_fee\":3250,\"area\":\"Ar Rimal\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\"],\"available_contract_lengths\":[24],\"features\":\"\"},{\"description\":\"Hyundai Elantra 2026\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"year\":2026,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2500,\"starter_fee\":2875,\"area\":\"Ar Rimal\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\"],\"available_contract_lengths\":[24,30],\"features\":\"\"},{\"description\":\"Hyundai Accent 2026\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2500,\"starter_fee\":2700,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"}],\"status\":\"Alternative Found\",\"target_body_type\":\"Sedan\"}\n",
+    "recorded_at": "0001-01-01T00:00:00Z"
+  },
+  {
+    "name": "City. Unknown carries alternatives",
+    "payload": {
+      "city": "Atlantis",
+      "product": "STO"
+    },
+    "api_key_provided": true,
+    "status_code": 200,
+    "body": {
+      "also_in_cities": [
+        "Dammam",
+        "Jeddah",
+        "Riyadh"
+      ],
+      "message": "We currently have no cars available in Atlantis on the Subscribe to Own plan. I do have them in Dammam, Jeddah, Riyadh.",
+      "results": [],
+      "status": "No Cars Found"
+    },
+    "raw_body": "{\"also_in_cities\":[\"Dammam\",\"Jeddah\",\"Riyadh\"],\"message\":\"We currently have no cars available in Atlantis on the Subscribe to Own plan. I do have them in Dammam, Jeddah, Riyadh.\",\"results\":[],\"status\":\"No Cars Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -1326,11 +1701,22 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
-      "message": "We currently have no cars available in Atlantis.",
+      "also_in_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
+      ],
+      "message": "We currently have no cars available in Atlantis. I do have them in Al Khobar, Arar, Dammam.",
       "results": [],
       "status": "No Cars Found"
     },
-    "raw_body": "{\"message\":\"We currently have no cars available in Atlantis.\",\"results\":[],\"status\":\"No Cars Found\"}\n",
+    "raw_body": "{\"also_in_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"message\":\"We currently have no cars available in Atlantis. I do have them in Al Khobar, Arar, Dammam.\",\"results\":[],\"status\":\"No Cars Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   }
 ]

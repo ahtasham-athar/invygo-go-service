@@ -59,15 +59,16 @@ func invariantProblems(reqProduct, city, cond, body string, budget float64, resp
 				add("%s starter_fee!=0", prod)
 			}
 		}
-		if cond != "" && !strings.EqualFold(cl("condition"), cond) {
+		// Condition is honored on Ideal; in fallback it may be broadened (reported via relaxed_filters).
+		if cond != "" && status == StatusIdeal && !strings.EqualFold(cl("condition"), cond) {
 			add("condition leak %q!=%q", cl("condition"), cond)
 		}
 		if body != "" && !strings.EqualFold(cl("body_type"), body) {
 			add("body leak %q!=%q (status=%s)", cl("body_type"), body, status)
 		}
 		// Budget cap only applies to monthly-priced plans on positive-match statuses.
-		if prod != "STS" && budget > 0 && (status == StatusIdeal || status == StatusAlternative) && cf("base_price") > budget+200 {
-			add("budget cap %.0f>%.0f+200 (status=%s)", cf("base_price"), budget, status)
+		if prod != "STS" && budget > 0 && (status == StatusIdeal || status == StatusAlternative) && cf("base_price") > bandCeiling(budget) {
+			add("budget cap %.0f>ceiling %.0f (status=%s)", cf("base_price"), bandCeiling(budget), status)
 		}
 	}
 	return p
@@ -138,7 +139,7 @@ func TestAllStatusesReachable(t *testing.T) {
 		{StatusIdeal, `{"city":"Riyadh","product":"STO","query":"Toyota"}`},
 		{StatusAlternative, `{"city":"Riyadh","product":"STO","query":"Ferrari","body_type":"Sedan","max_price":2500}`},
 		{StatusAboveBudget, `{"city":"Riyadh","product":"STO","body_type":"SUV","max_price":300}`},
-		{StatusBudgetNeeded, `{"city":"Riyadh","product":"MONTHLY","query":"Zzz","body_type":"Sedan"}`},
+		{StatusAlternative, `{"city":"Riyadh","product":"MONTHLY","query":"Zzz","body_type":"Sedan"}`}, // no budget -> laddered Alternative (Budget Needed retired)
 		{StatusNoBodyMatch, `{"city":"Riyadh","product":"STO","body_type":"Van"}`},
 		{StatusNeedBodyType, `{"city":"Riyadh","product":"STO","query":"Zxqwerty"}`},
 		{StatusNoCars, `{"city":"Atlantis"}`},

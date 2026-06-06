@@ -1,0 +1,82 @@
+{
+  "name": "filter_invygo_car (PRODUCTION)",
+  "description": "Searches the live Invygo fleet across Subscribe-to-Own, Monthly, and Short-Term (daily/weekly) plans by city (mandatory), plan, brand/model, budget, body type, color and condition. Returns matching cars plus a status the agent uses to decide how to respond.",
+  "function_name": "filter_invygo_car",
+  "function_description": "Search the Invygo car inventory. Always pass the user's city (mandatory) and the plan you handle (product). Optionally pass a specific brand/model (query), the user's budget (max_price), body_type, color, or condition. Use 'tier' ONLY for explicit luxury/segment requests. The response includes a 'status' field, a 'results' array, and helpful hints (e.g. also_in_cities, also_in_products, price_min/price_max).",
+  "parameter_schema": {
+    "type": "object",
+    "required": ["city"],
+    "properties": {
+      "city": {
+        "type": "string",
+        "enum": ["Riyadh", "Jeddah", "Dammam", "Al Khobar", "Madinah", "Mecca", "Taif", "Arar", "Turayf"],
+        "description": "The pickup/service city. MANDATORY. Must be one of the listed cities."
+      },
+      "product": {
+        "type": "string",
+        "enum": ["STO", "MONTHLY", "STS", ""],
+        "description": "The subscription plan to search: STO (Subscribe to Own), MONTHLY (monthly subscription), or STS (short-term daily/weekly rental). Send the plan THIS agent handles."
+      },
+      "query": {
+        "type": "string",
+        "description": "A specific brand or model ONLY (e.g. 'Toyota', 'Yaris', 'Camry'). Do NOT put body types ('SUV','Sedan'), tiers, or colors here."
+      },
+      "max_price": {
+        "type": "number",
+        "description": "The user's budget in Saudi Riyals. Monthly amount for STO/MONTHLY; weekly amount for STS (optional for STS)."
+      },
+      "min_price": {
+        "type": "number",
+        "description": "Optional LOWER price bound for a range request (e.g. 'between 1500 and 2500' -> min_price 1500). Same basis as max_price. Leave empty unless the user gives a floor."
+      },
+      "min_year": {
+        "type": "number",
+        "description": "Optional minimum model year (e.g. '2024 or newer' -> 2024). Cars older than this are excluded. Leave empty unless the user asks for a minimum year."
+      },
+      "body_type": {
+        "type": "string",
+        "enum": ["Sedan", "SUV", "Crossover", "CUV", "Hatchback", "Minivan", "Pickup", "Van", ""],
+        "description": "Physical body shape. Infer from the model when possible (e.g. Yaris->Sedan, Creta->SUV, Hilux->Pickup). Used for recommendations/alternatives."
+      },
+      "tier": {
+        "type": "string",
+        "enum": ["Entry level Sedan", "Midsize Sedan", "Entry level SUV", "Midsize SUV", "Luxury Sedan", "Luxury SUV", "Luxury Hatchback", "Luxury MPV", "Subcompact Hatchback", "Pickup Truck", "Luxury", ""],
+        "description": "ONLY for explicit segment/luxury requests. Use a specific tier (e.g. 'Midsize Sedan', 'Luxury SUV') or the generic 'Luxury' for any luxury car. Leave empty for normal searches and for alternative recommendations."
+      },
+      "color": {
+        "type": "string",
+        "description": "A specific color preference (e.g. 'White', 'Black')."
+      },
+      "condition": {
+        "type": "string",
+        "enum": ["NEW", "USED", ""],
+        "description": "Only set if the user explicitly asks for a New or Used car."
+      }
+    }
+  },
+  "http_method": "POST",
+  "base_url": "https://go.convoi.ai/",
+  "endpoint_path": "invygo-v2/search",
+  "headers": {
+    "x-api-key": "f990ae1905ce649875800f3d3c39a05d42b2aa8b6d760303811a738e3f20z999",
+    "Content-Type": "application/json"
+  },
+  "request_template": {
+    "city": "${city}",
+    "product": "${product}",
+    "query": "${query}",
+    "max_price": "${max_price}",
+    "min_price": "${min_price}",
+    "min_year": "${min_year}",
+    "body_type": "${body_type}",
+    "tier": "${tier}",
+    "color": "${color}",
+    "condition": "${condition}"
+  },
+  "auth_required": true,
+  "auth_type": "none",
+  "response_mapping": {},
+  "error_mapping": {},
+  "active": true,
+  "is_public": false
+}

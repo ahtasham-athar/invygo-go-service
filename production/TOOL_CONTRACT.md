@@ -31,7 +31,9 @@ Build: `go build -o invygo-prod ./production`.
     "city":      { "type": "string", "enum": ["Riyadh","Jeddah","Dammam","Al Khobar","Madinah","Mecca","Taif","Arar","Turayf"], "description": "Pickup city. MANDATORY." },
     "product":   { "type": "string", "enum": ["STO","MONTHLY","STS",""], "description": "Plan. Each squad agent sends its own: STO / MONTHLY / STS (weekly rental)." },
     "query":     { "type": "string", "description": "Specific brand or model only (e.g. 'Toyota','Yaris'). NOT body types/tiers." },
-    "max_price": { "type": "number", "description": "User's budget. Monthly amount for STO/MONTHLY; weekly for STS (optional for STS)." },
+    "max_price": { "type": "number", "description": "User's budget (ceiling). Monthly for STO/MONTHLY; weekly for STS (optional for STS)." },
+    "min_price": { "type": "number", "description": "Optional lower bound for range searches ('between X and Y'). Same basis as max_price." },
+    "min_year":  { "type": "number", "description": "Optional minimum model year ('2024 or newer'); older cars excluded." },
     "body_type": { "type": "string", "enum": ["Sedan","SUV","Crossover","CUV","Hatchback","Minivan","Pickup","Van",""], "description": "Body shape. Distinct values; not merged." },
     "tier":      { "type": "string", "description": "ONLY for explicit segment/luxury requests (e.g. 'Luxury','Midsize Sedan'). Not for recommendations." },
     "color":     { "type": "string" },
@@ -51,21 +53,25 @@ Notes:
 | `status` | Meaning | Agent action |
 |----------|---------|--------------|
 | `Ideal Match Found` | request satisfied in-city/in-product | present top 2 (hold rest) |
-| `Alternative Found` | requested car/exact not found → **same body_type within budget+200** (or STS closest weekly) | "couldn't find X, here are similar [body]" |
-| `Only Above Budget` | same body_type exists but all > budget+200 | quote `cheapest`, offer to adjust |
-| `Budget Needed` | body_type known (STO/MONTHLY), no budget | ask budget using `price_min`–`price_max` range |
-| `No Body Type Match` | requested body_type/tier has nothing here | say none available; use `also_in_*` to inform where it is (NO handoff) |
-| `Need Body Type` | unknown model, no anchor | ask "sedan, SUV, …?" |
-| `No Cars Found` | nothing in city (+product) | apologise; offer another city/plan |
+| `Alternative Found` | exact not found → **same body_type within budget+10%**, OR (no budget) a **price-laddered spread** carrying `price_min`/`price_max`, OR STS closest weekly | present top 2; if `price_min/max` present, *optionally* offer to narrow by price — never demand a budget |
+| `Only Above Budget` | same body_type exists but all > budget+10% | quote `cheapest`, offer to adjust |
+| `No Body Type Match` | requested body_type/tier has nothing here | offer the `available_body_types` we DO have; `also_in_*` informs where it exists (NO handoff) |
+| `Need Body Type` | unknown model, no anchor | ask "sedan, SUV, …?" (uses `available_body_types`) |
+| `No Cars Found` | nothing in city (+product) | suggest the nearest `also_in_cities` / other `also_in_products` (never a bare dead-end) |
 | `Upsell Options Found` | broad "show me cars" | present a small sampler |
 | `Error` | bad/missing city or server | recover |
 
 ### Root meta fields (present when relevant)
 - `target_body_type` — the body_type the fallback anchored on.
-- `price_min`, `price_max` — range for `Budget Needed`.
+- `price_min`, `price_max` — the price spread for a no-budget `Alternative Found`.
 - `cheapest` — for `Only Above Budget`.
-- `also_in_cities`, `also_in_products` — where a requested car/tier exists elsewhere
-  (drives the travel flow / "available on another plan" line; **inform only, no handoff**).
+- `also_in_cities`, `also_in_products` — where stock exists elsewhere; on `No Cars Found`
+  they list the **nearest cities / other plans that have stock**. **Inform only, no handoff.**
+- `available_body_types` — on `No Body Type Match` / `Need Body Type`: the body types we DO carry here.
+- `relaxed_filters` — descriptive filters broadened in a fallback (e.g. `["condition","color"]`);
+  the agent should acknowledge it ("no used in that exact match, so here's what I have…").
+- **No-dead-end invariant:** any response with empty `results` always carries at least one of
+  `also_in_cities` / `also_in_products` / `available_body_types`.
 
 ## Per-car result fields
 
@@ -95,8 +101,17 @@ Notes:
   asks. For exact daily/multi-day totals, defer to the app. Starter fee = 10% rule note.
 - Unpriced rows (`base_price<=0`) are never returned.
 
-## Behaviour locked with client (2026-06-04)
-- Asymmetric band: allow ≤ budget, cap at **budget+200**, rank by closeness.
+## Behaviour locked with client (2026-06-04, updated 2026-06-05)
+- Asymmetric band: allow ≤ budget, cap at **+10%** (`BUDGET_BAND_PCT`; ≈+200–250 at typical
+  2,000–2,500 prices — matches the old flat +200 — smaller for cheap, larger for premium), ranked by closeness.
+- **No-budget = no dead-end:** a body-anchored search with no budget returns a **price-laddered
+  spread** (cheapest → premium) as `Alternative Found` + `price_min`/`price_max`; it never blocks
+  on budget. (The `Budget Needed` status is **retired**; the const stays for back-compat.)
+- **Condition is soft:** a "used"/"new" request no longer dead-ends to `No Cars Found`; it falls
+  back ignoring condition and reports `relaxed_filters`.
+- **No status returns empty `results` without an alternative hint** (`also_in_cities` /
+  `also_in_products` / `available_body_types`).
+- `min_price` (range floor) and `min_year` ("2024+") are honored as firm constraints.
 - STS: no band; sort by closest weekly price; budget optional.
 - Cross-product/city: **inform only**, then offer same-product alternatives. No auto-handoff.
 - body_type inference is data-driven (majority vote per model); unknown model → ask.
