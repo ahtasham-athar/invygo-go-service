@@ -27,9 +27,7 @@ const CACHE_TTL = 60 * time.Minute
 
 // Live production sheet (client keeps appending cars; always pull latest).
 // Override with INVYGO_SHEET_URL, or use INVYGO_SHEET_FILE for offline/dev.
-const defaultSheetURL = "https://docs.google.com/spreadsheets/d/1ZJJhKhosbKoHoUB5kHEhtK5hDD00v-RkU_BzbqgnPu4/export?format=csv"
-
-// const defaultSheetURL = "https://docs.google.com/spreadsheets/d/122ODHukERmK36i0K5rI3o4lIgDAHDNL9AH6-EkKMgz4/export?format=csv"
+const defaultSheetURL = "https://docs.google.com/spreadsheets/d/122ODHukERmK36i0K5rI3o4lIgDAHDNL9AH6-EkKMgz4/export?format=csv"
 
 func apiKey() string { return strings.TrimSpace(os.Getenv("INVYGO_API_KEY")) }
 
