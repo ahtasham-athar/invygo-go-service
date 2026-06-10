@@ -95,6 +95,14 @@ type GroupedResult struct {
 	AvailableColors          []string `json:"available_colors"`
 	AvailableContractLengths []int    `json:"available_contract_lengths,omitempty"`
 	Features                 string   `json:"features"`
+	// Spoken (Saudi-Arabic words) forms of every numeric field. These are the
+	// SINGLE SOURCE OF TRUTH for how the agent must voice numbers: the LLM must
+	// copy these verbatim instead of converting digits itself (it corrupts them:
+	// 2025→2005, 1950→2950, 36→33). Rendered deterministically here, at origin.
+	YearSpoken                     string   `json:"year_spoken,omitempty"`
+	BasePriceSpoken                string   `json:"base_price_spoken,omitempty"`
+	StarterFeeSpoken               string   `json:"starter_fee_spoken,omitempty"`
+	AvailableContractLengthsSpoken []string `json:"available_contract_lengths_spoken,omitempty"`
 }
 
 // flexFloat tolerates JSON numbers, numeric strings ("2500", "2,500"), null and "".
@@ -995,6 +1003,72 @@ func planLabel(product string) string {
 	}
 }
 
+// --- Arabic number rendering (Saudi dialect) -------------------------------
+// SINGLE SOURCE OF TRUTH for how numbers are spoken. The LLM must copy the
+// resulting *_spoken strings verbatim instead of converting digits itself — it
+// corrupts them in Arabic (2025→2005, 1950→2950, 36→33, 570→700). Rendering the
+// exact integer to words here, at origin, makes the spoken form impossible to
+// drift from the value. Word forms match the Saudi dialect already in use
+// (ألفين, مية/ميتين/ثلاثمية, units-before-tens joined with «و»).
+var arOnes = []string{"", "واحد", "اثنين", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة"}
+var arTeens = []string{"عشرة", "أحد عشر", "اثنا عشر", "ثلاثة عشر", "أربعة عشر", "خمسة عشر", "ستة عشر", "سبعة عشر", "ثمانية عشر", "تسعة عشر"}
+var arTens = []string{"", "", "عشرين", "ثلاثين", "أربعين", "خمسين", "ستين", "سبعين", "ثمانين", "تسعين"}
+var arHundreds = []string{"", "مية", "ميتين", "ثلاثمية", "أربعمية", "خمسمية", "ستمية", "سبعمية", "ثمنمية", "تسعمية"}
+
+func arTwoDigits(n int) string {
+	switch {
+	case n == 0:
+		return ""
+	case n < 10:
+		return arOnes[n]
+	case n < 20:
+		return arTeens[n-10]
+	}
+	u, t := n%10, n/10
+	if u == 0 {
+		return arTens[t]
+	}
+	return arOnes[u] + " و" + arTens[t]
+}
+
+func arThousands(n int) string {
+	switch {
+	case n == 1:
+		return "ألف"
+	case n == 2:
+		return "ألفين"
+	case n >= 3 && n <= 10:
+		return arOnes[n] + " آلاف"
+	}
+	return arNumberWords(n) + " ألف"
+}
+
+// arNumberWords renders 0..999999 as spoken Saudi-Arabic words.
+func arNumberWords(n int) string {
+	if n < 0 || n > 999999 {
+		return fmt.Sprintf("%d", n)
+	}
+	if n == 0 {
+		return "صفر"
+	}
+	parts := []string{}
+	th, rest := n/1000, n%1000
+	if th > 0 {
+		parts = append(parts, arThousands(th))
+	}
+	h, two := rest/100, rest%100
+	if h > 0 {
+		parts = append(parts, arHundreds[h])
+	}
+	if two > 0 {
+		parts = append(parts, arTwoDigits(two))
+	}
+	return strings.Join(parts, " و")
+}
+
+// arMoneyWords renders a whole-riyal price as spoken words.
+func arMoneyWords(f float64) string { return arNumberWords(int(f + 0.5)) }
+
 func groupResults(cars []Car) []GroupedResult {
 	grouped := map[string]*GroupedResult{}
 	var order []string
@@ -1042,8 +1116,22 @@ func groupResults(cars []Car) []GroupedResult {
 	}
 	results := make([]GroupedResult, 0, len(order))
 	for _, k := range order {
-		sort.Ints(grouped[k].AvailableContractLengths)
-		results = append(results, *grouped[k])
+		g := grouped[k]
+		sort.Ints(g.AvailableContractLengths)
+		// Deterministic spoken forms — the agent voices numbers by copying these.
+		g.YearSpoken = arNumberWords(g.Year)
+		g.BasePriceSpoken = arMoneyWords(g.BasePrice)
+		if g.StarterFee > 0 {
+			g.StarterFeeSpoken = arMoneyWords(g.StarterFee)
+		}
+		if len(g.AvailableContractLengths) > 0 {
+			cls := make([]string, 0, len(g.AvailableContractLengths))
+			for _, n := range g.AvailableContractLengths {
+				cls = append(cls, arNumberWords(n))
+			}
+			g.AvailableContractLengthsSpoken = cls
+		}
+		results = append(results, *g)
 	}
 	return results
 }
@@ -1083,6 +1171,12 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	resp := map[string]interface{}{"status": sr.Status, "message": sr.Message, "results": sr.Results}
 	for k, v := range sr.Meta {
 		resp[k] = v
+	}
+	// Spoken forms for the numeric hints the agent quotes (e.g. "starts around ...").
+	for _, fld := range []string{"cheapest", "price_min", "price_max"} {
+		if fv, ok := resp[fld].(float64); ok {
+			resp[fld+"_spoken"] = arMoneyWords(fv)
+		}
 	}
 	_ = json.NewEncoder(w).Encode(resp)
 }
