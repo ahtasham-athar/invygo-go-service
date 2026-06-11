@@ -81,19 +81,23 @@ type GroupedResult struct {
 	Description              string   `json:"description"`
 	Brand                    string   `json:"brand"`
 	Model                    string   `json:"model"`
-	Year                     int      `json:"year"`
+	// Raw numeric fields are kept as Go fields (used internally for sorting and to
+	// build the spoken forms) but are NOT serialized to the agent (`json:"-"`).
+	// The agent must never see a raw digit it could re-render wrong (4820→8650,
+	// 2025→2005); it sees ONLY the Arabic *_spoken words below.
+	Year                     int      `json:"-"`
 	Condition                string   `json:"condition"`
 	BodyType                 string   `json:"body_type"`
 	Tier                     string   `json:"tier"`
 	Product                  string   `json:"product"`
 	PriceBasis               string   `json:"price_basis"`
-	BasePrice                float64  `json:"base_price"`
-	StarterFee               float64  `json:"starter_fee"`                 // exact, STO only
+	BasePrice                float64  `json:"-"`
+	StarterFee               float64  `json:"-"`                           // exact, STO only
 	StarterFeeNote           string   `json:"starter_fee_note,omitempty"`  // 10% rule, MONTHLY/STS
 	Area                     string   `json:"area"`
 	City                     string   `json:"city"`
 	AvailableColors          []string `json:"available_colors"`
-	AvailableContractLengths []int    `json:"available_contract_lengths,omitempty"`
+	AvailableContractLengths []int    `json:"-"`
 	Features                 string   `json:"features"`
 	// Spoken (Saudi-Arabic words) forms of every numeric field. These are the
 	// SINGLE SOURCE OF TRUTH for how the agent must voice numbers: the LLM must
@@ -960,8 +964,9 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 		min, max := priceRange(cand)
 		meta["price_min"], meta["price_max"] = min, max
 		g := priceLadder(groupResults(cand), 4)
+		// Prices in the message as Arabic WORDS, never digits the agent could misread.
 		return SearchResult{Results: g, Status: StatusAlternative, Meta: meta,
-			Message: fmt.Sprintf("Here are a few %s options from %.0f to %.0f Saudi Riyaals — want me to narrow to a price, or shall I tell you about these?", target, min, max)}
+			Message: fmt.Sprintf("Here are a few %s options from %s to %s Saudi Riyaals — want me to narrow to a price, or shall I tell you about these?", target, arMoneyWords(min), arMoneyWords(max))}
 	}
 
 	// STO / MONTHLY with budget: asymmetric proportional band (cheaper always allowed).
@@ -982,7 +987,7 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 	meta["cheapest"] = min
 	g := capN(sortedAsc(groupResults(cand)), 4)
 	return SearchResult{Results: g, Status: StatusAboveBudget, Meta: meta,
-		Message: fmt.Sprintf("The %s options I have start around %.0f Saudi Riyaals, a bit above your budget.", target, min)}
+		Message: fmt.Sprintf("The %s options I have start around %s Saudi Riyaals, a bit above your budget.", target, arMoneyWords(min))}
 }
 
 func sortedAsc(g []GroupedResult) []GroupedResult {
@@ -1086,8 +1091,14 @@ func groupResults(cars []Car) []GroupedResult {
 			} else {
 				note = "A one-time starter fee of 10% of the " + priceBasis(c.Product) + " amount applies."
 			}
+			// Description carries the year as Arabic WORDS (not digits), so even this
+			// human-readable label can't be misread as a number by the agent.
+			desc := strings.TrimSpace(c.Brand + " " + c.Model)
+			if c.Year > 0 {
+				desc += " " + arNumberWords(c.Year)
+			}
 			g = &GroupedResult{
-				Description:     fmt.Sprintf("%s %s %d", c.Brand, c.Model, c.Year),
+				Description:     desc,
 				Brand:           c.Brand,
 				Model:           c.Model,
 				Year:            c.Year,
@@ -1119,7 +1130,9 @@ func groupResults(cars []Car) []GroupedResult {
 		g := grouped[k]
 		sort.Ints(g.AvailableContractLengths)
 		// Deterministic spoken forms — the agent voices numbers by copying these.
-		g.YearSpoken = arNumberWords(g.Year)
+		if g.Year > 0 {
+			g.YearSpoken = arNumberWords(g.Year)
+		}
 		g.BasePriceSpoken = arMoneyWords(g.BasePrice)
 		if g.StarterFee > 0 {
 			g.StarterFeeSpoken = arMoneyWords(g.StarterFee)
@@ -1173,9 +1186,11 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		resp[k] = v
 	}
 	// Spoken forms for the numeric hints the agent quotes (e.g. "starts around ...").
+	// Emit ONLY the Arabic words and delete the raw digit so the agent can't read it.
 	for _, fld := range []string{"cheapest", "price_min", "price_max"} {
 		if fv, ok := resp[fld].(float64); ok {
 			resp[fld+"_spoken"] = arMoneyWords(fv)
+			delete(resp, fld)
 		}
 	}
 	_ = json.NewEncoder(w).Encode(resp)
