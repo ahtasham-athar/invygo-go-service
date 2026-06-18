@@ -23,7 +23,7 @@ import (
 // TEST_API_KEY is a stable key used by the test suite; it is NOT used by the server.
 const TEST_API_KEY = "test-api-key"
 
-const CACHE_TTL = 60 * time.Minute
+const CACHE_TTL = 10 * time.Minute
 
 // Live production sheet (client keeps appending cars; always pull latest).
 // Override with INVYGO_SHEET_URL, or use INVYGO_SHEET_FILE for offline/dev.
@@ -395,7 +395,7 @@ func parseRecords(records [][]string) []Car {
 	for _, row := range records[1:] {
 		brand := get(row, "brand_name_fixed")
 		model := get(row, "car_name_fixed")
-		city := get(row, "city")
+		city := canonicalCity(get(row, "city"))
 		product := strings.ToUpper(get(row, "product"))
 		// Skip rows missing the essentials.
 		if brand == "" || model == "" || city == "" || product == "" {
@@ -538,8 +538,9 @@ func bodyTypesPresent(cars []Car) []string {
 var cityRegion = map[string]string{
 	"riyadh": "central",
 	"jeddah": "west", "mecca": "west", "madinah": "west", "taif": "west",
-	"dammam": "east", "al khobar": "east",
+	"dammam": "east", "al khobar": "east", "al hasa": "east",
 	"arar": "north", "turayf": "north",
+	"abha": "south", "khamis": "south",
 }
 
 // citiesWithStock returns service cities (excluding exclCity) that have priced stock for the
@@ -766,7 +767,7 @@ func normalizeCity(s string) string {
 		return "Al Khobar"
 	case "madinah", "medina", "al madinah", "المدينة", "المدينه", "مدينة":
 		return "Madinah"
-	case "mecca", "makkah", "مكة", "مكه":
+	case "mecca", "makkah", "makah", "meeca", "مكة", "مكه":
 		return "Mecca"
 	case "taif", "al taif", "الطائف", "طائف":
 		return "Taif"
@@ -774,8 +775,46 @@ func normalizeCity(s string) string {
 		return "Arar"
 	case "turayf", "turaif", "طريف":
 		return "Turayf"
+	case "abha", "أبها", "ابها":
+		return "Abha"
+	case "al hasa", "alhasa", "al-hasa", "hasa", "hofuf", "الأحساء", "الاحساء", "الحسا", "أحساء":
+		return "Al Hasa"
+	case "khamis", "khamis mushait", "خميس", "خميس مشيط":
+		return "Khamis"
 	}
 	return strings.TrimSpace(s)
+}
+
+// cityCanon folds free-typed inventory city spellings to one canonical English name, so a
+// client typo/variant (e.g. "Makah" → "Mecca") doesn't split one city into two buckets.
+var cityCanon = map[string]string{
+	"makah": "Mecca", "makkah": "Mecca", "meeca": "Mecca",
+}
+
+// canonicalCity normalizes a raw inventory city value before it is stored on a Car.
+func canonicalCity(s string) string {
+	t := strings.TrimSpace(s)
+	if c, ok := cityCanon[strings.ToLower(t)]; ok {
+		return c
+	}
+	return t
+}
+
+// allServiceCities returns the live distinct list of cities that currently have priced stock,
+// derived straight from inventory — the source of truth for "which cities do you serve?".
+func allServiceCities(inv []Car) []string {
+	set := map[string]bool{}
+	for _, c := range inv {
+		if c.BasePrice > 0 && strings.TrimSpace(c.City) != "" {
+			set[c.City] = true
+		}
+	}
+	out := make([]string, 0, len(set))
+	for c := range set {
+		out = append(out, c)
+	}
+	sort.Strings(out)
+	return out
 }
 
 func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) SearchResult {
@@ -1185,6 +1224,23 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	for k, v := range sr.Meta {
 		resp[k] = v
 	}
+	// Live serviceable-cities list (from inventory), so the agent can answer "which cities do
+	// you serve?" and suggest real alternatives without relying on a hardcoded list.
+	resp["service_cities"] = allServiceCities(cars)
+	// Always surface the cheapest *presentable* price as a grounded hint, on ANY status
+	// that returned cars (not just Only-Above-Budget). This lets the agent answer an
+	// explicit "what's your cheapest car?" from a real token even when the budget sort
+	// put the most expensive car first — the value is the min over what we actually return,
+	// so it's always a car the agent can present.
+	if _, ok := resp["cheapest"]; !ok && len(sr.Results) > 0 {
+		min := sr.Results[0].BasePrice
+		for _, g := range sr.Results {
+			if g.BasePrice < min {
+				min = g.BasePrice
+			}
+		}
+		resp["cheapest"] = min
+	}
 	// Spoken forms for the numeric hints the agent quotes (e.g. "starts around ...").
 	// Emit ONLY the Arabic words and delete the raw digit so the agent can't read it.
 	for _, fld := range []string{"cheapest", "price_min", "price_max"} {
@@ -1194,6 +1250,35 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	_ = json.NewEncoder(w).Encode(resp)
+}
+
+// CitiesHandler returns the live serviceable-cities list, derived straight from inventory. No
+// request body is needed. It lets the agent fetch the current cities before naming them, or before
+// deciding whether a customer's city is served — so nothing about cities is ever hardcoded.
+func CitiesHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if apiKey() == "" {
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": StatusError, "message": "Server is not configured (missing INVYGO_API_KEY)."})
+		return
+	}
+	if r.Header.Get("x-api-key") != apiKey() {
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"error": "Unauthorized"})
+		return
+	}
+	cars, _, err := getInventory()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": StatusError, "message": "Inventory is temporarily unavailable. Please try again shortly."})
+		return
+	}
+	cities := allServiceCities(cars)
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		"cities":  cities,
+		"count":   len(cities),
+		"message": "These are the cities Invygo currently serves (live from inventory).",
+	})
 }
 
 func main() {
@@ -1211,6 +1296,7 @@ func main() {
 		port = "8081"
 	}
 	http.HandleFunc("/search", SearchHandler)
+	http.HandleFunc("/cities", CitiesHandler)
 	log.Println("Service running on :" + port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
