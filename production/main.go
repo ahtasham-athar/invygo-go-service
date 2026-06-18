@@ -1082,7 +1082,7 @@ func arThousands(n int) string {
 	case n == 2:
 		return "ألفين"
 	case n >= 3 && n <= 10:
-		return arOnes[n] + " آلاف"
+		return arTwoDigits(n) + " آلاف" // arTwoDigits renders 10 as "عشرة"; arOnes[10] was out of range
 	}
 	return arNumberWords(n) + " ألف"
 }
