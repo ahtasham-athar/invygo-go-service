@@ -735,19 +735,14 @@ func capN(g []GroupedResult, n int) []GroupedResult {
 }
 
 func sortAndCap(g []GroupedResult, budget float64, isSTS bool) []GroupedResult {
-	if isSTS {
-		if budget > 0 {
-			sortByCloseness(g, budget)
-		} else {
-			sortByPriceAsc(g)
-		}
-	} else {
-		if budget > 0 {
-			sortByPriceDesc(g)
-		} else {
-			sortByPriceAsc(g)
-		}
-	}
+	// ALL plans (STO / MONTHLY / STS) — ALWAYS cheapest-first. A max_price has already
+	// filtered out anything above budget, so it only caps the ceiling; within the band we
+	// always lead with the cheapest. Uniform regardless of plan or budget, so a "cheapest"
+	// (or any budget) request always surfaces the genuinely lowest cars and never caps the
+	// cheapest off behind pricier in-band ones. (Fixes client feedback #3.)
+	_ = isSTS
+	_ = budget
+	sortByPriceAsc(g)
 	return capN(g, 4)
 }
 
