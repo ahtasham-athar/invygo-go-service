@@ -812,6 +812,50 @@ func allServiceCities(inv []Car) []string {
 	return out
 }
 
+// servicePlansByCity computes, from live inventory, which plans (STO/MONTHLY/STS) each city
+// actually offers. Returns byPlan (plan -> sorted cities) and cityPlans (city -> sorted plans),
+// so the agent can tell a customer the CORRECT cities per plan — a plan is offered only where it
+// actually has stock (e.g. STS is not in every city; STO is only the hub cities).
+func servicePlansByCity(inv []Car) (map[string][]string, map[string][]string) {
+	planCities := map[string]map[string]bool{}
+	cityPlanSet := map[string]map[string]bool{}
+	for _, c := range inv {
+		if c.BasePrice <= 0 {
+			continue
+		}
+		city := strings.TrimSpace(c.City)
+		prod := strings.ToUpper(strings.TrimSpace(c.Product))
+		if city == "" || prod == "" {
+			continue
+		}
+		if planCities[prod] == nil {
+			planCities[prod] = map[string]bool{}
+		}
+		planCities[prod][city] = true
+		if cityPlanSet[city] == nil {
+			cityPlanSet[city] = map[string]bool{}
+		}
+		cityPlanSet[city][prod] = true
+	}
+	sortedKeys := func(set map[string]bool) []string {
+		list := make([]string, 0, len(set))
+		for k := range set {
+			list = append(list, k)
+		}
+		sort.Strings(list)
+		return list
+	}
+	byPlan := map[string][]string{}
+	for p, set := range planCities {
+		byPlan[p] = sortedKeys(set)
+	}
+	cityPlans := map[string][]string{}
+	for c, set := range cityPlanSet {
+		cityPlans[c] = sortedKeys(set)
+	}
+	return byPlan, cityPlans
+}
+
 func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) SearchResult {
 	city := normalizeCity(req.City)
 	product := strings.ToUpper(strings.TrimSpace(req.Product))
@@ -1269,10 +1313,13 @@ func CitiesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cities := allServiceCities(cars)
+	byPlan, cityPlans := servicePlansByCity(cars)
 	_ = json.NewEncoder(w).Encode(map[string]interface{}{
-		"cities":  cities,
-		"count":   len(cities),
-		"message": "These are the cities Invygo currently serves (live from inventory).",
+		"cities":     cities,
+		"by_plan":    byPlan,    // plan (STO/MONTHLY/STS) -> cities that actually offer it
+		"city_plans": cityPlans, // city -> plans available in that city
+		"count":      len(cities),
+		"message":    "Cities Invygo serves, live from inventory. A plan is offered ONLY in the cities listed under it in by_plan — not every city has every plan (e.g. STS is not in every city; STO is only the hub cities). Use by_plan/city_plans to tell the customer the correct cities for their plan.",
 	})
 }
 
