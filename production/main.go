@@ -33,14 +33,14 @@ func apiKey() string { return strings.TrimSpace(os.Getenv("INVYGO_API_KEY")) }
 
 // --- Status contract (agent branches on these) ---
 const (
-	StatusIdeal        = "Ideal Match Found"     // exact request satisfied
-	StatusAlternative  = "Alternative Found"     // same body_type, within budget (asymmetric) or STS closest
-	StatusAboveBudget  = "Only Above Budget"     // same body_type exists, all above budget+200
-	StatusBudgetNeeded = "Budget Needed"         // body_type known (STO/MONTHLY), no budget -> ask, range provided
-	StatusNoBodyMatch  = "No Body Type Match"    // requested body_type has zero cars in city/product
-	StatusNeedBodyType = "Need Body Type"        // cannot infer a body_type to anchor -> ask user
-	StatusNoCars       = "No Cars Found"         // nothing in city (+product)
-	StatusUpsell       = "Upsell Options Found"  // broad request, nothing matched, here is what we have
+	StatusIdeal        = "Ideal Match Found"    // exact request satisfied
+	StatusAlternative  = "Alternative Found"    // same body_type, within budget (asymmetric) or STS closest
+	StatusAboveBudget  = "Only Above Budget"    // same body_type exists, all above budget+200
+	StatusBudgetNeeded = "Budget Needed"        // body_type known (STO/MONTHLY), no budget -> ask, range provided
+	StatusNoBodyMatch  = "No Body Type Match"   // requested body_type has zero cars in city/product
+	StatusNeedBodyType = "Need Body Type"       // cannot infer a body_type to anchor -> ask user
+	StatusNoCars       = "No Cars Found"        // nothing in city (+product)
+	StatusUpsell       = "Upsell Options Found" // broad request, nothing matched, here is what we have
 	StatusError        = "Error"
 )
 
@@ -68,7 +68,7 @@ type Car struct {
 	Color          string  `json:"color"`
 	Product        string  `json:"product"` // STO | MONTHLY | STS
 	BasePrice      float64 `json:"invygo_baseprice"`
-	StarterFee     float64 `json:"starter_fee"`     // meaningful for STO only
+	StarterFee     float64 `json:"starter_fee"` // meaningful for STO only
 	ContractLength int     `json:"sto_contract_length"`
 	Condition      string  `json:"car_condition"`
 
@@ -78,9 +78,9 @@ type Car struct {
 }
 
 type GroupedResult struct {
-	Description              string   `json:"description"`
-	Brand                    string   `json:"brand"`
-	Model                    string   `json:"model"`
+	Description string `json:"description"`
+	Brand       string `json:"brand"`
+	Model       string `json:"model"`
 	// Raw numeric fields are kept as Go fields (used internally for sorting and to
 	// build the spoken forms) but are NOT serialized to the agent (`json:"-"`).
 	// The agent must never see a raw digit it could re-render wrong (4820→8650,
@@ -92,8 +92,8 @@ type GroupedResult struct {
 	Product                  string   `json:"product"`
 	PriceBasis               string   `json:"price_basis"`
 	BasePrice                float64  `json:"-"`
-	StarterFee               float64  `json:"-"`                           // exact, STO only
-	StarterFeeNote           string   `json:"starter_fee_note,omitempty"`  // 10% rule, MONTHLY/STS
+	StarterFee               float64  `json:"-"`                          // exact, STO only
+	StarterFeeNote           string   `json:"starter_fee_note,omitempty"` // 10% rule, MONTHLY/STS
 	Area                     string   `json:"area"`
 	City                     string   `json:"city"`
 	AvailableColors          []string `json:"available_colors"`
@@ -708,8 +708,12 @@ func tierAvailability(inv []Car, tier, exclCity, exclProduct string) (cities, pr
 }
 
 // --- Sorting / capping ---
-func sortByPriceAsc(g []GroupedResult)  { sort.SliceStable(g, func(i, j int) bool { return g[i].BasePrice < g[j].BasePrice }) }
-func sortByPriceDesc(g []GroupedResult) { sort.SliceStable(g, func(i, j int) bool { return g[i].BasePrice > g[j].BasePrice }) }
+func sortByPriceAsc(g []GroupedResult) {
+	sort.SliceStable(g, func(i, j int) bool { return g[i].BasePrice < g[j].BasePrice })
+}
+func sortByPriceDesc(g []GroupedResult) {
+	sort.SliceStable(g, func(i, j int) bool { return g[i].BasePrice > g[j].BasePrice })
+}
 
 func sortByCloseness(g []GroupedResult, budget float64) {
 	abs := func(x float64) float64 {
@@ -760,7 +764,12 @@ func normalizeCity(s string) string {
 		return "Dammam"
 	case "al khobar", "alkhobar", "khobar", "الخبر", "خبر":
 		return "Al Khobar"
-	case "madinah", "medina", "al madinah", "المدينة", "المدينه", "مدينة":
+	// NOTE: the bare Arabic word «المدينة/مدينة» just means "city" and used to be
+	// mapped to Madinah here — that silently turned garbled fragments like
+	// «أي مدينة» into a Madinah search. Only explicit forms map now; the agent
+	// prompt disambiguates a bare «المدينة» by confirming «المدينة المنورة».
+	case "madinah", "medina", "al madinah", "al madinah al munawwarah",
+		"المدينة المنورة", "المدينه المنوره", "المدينة المنوره", "المدينه المنورة":
 		return "Madinah"
 	case "mecca", "makkah", "makah", "meeca", "مكة", "مكه":
 		return "Mecca"
@@ -934,7 +943,10 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 		if !priceOK(c.BasePrice) {
 			continue
 		}
-		if !isSTS && budget > 0 && c.BasePrice > budget {
+		// Budget is a hard ceiling for ALL plans. (STS used to be exempt, which made
+		// a weekly budget of 500 return 700+ cars as "Ideal Match Found" — the agent
+		// then told the customer "I have what you're looking for" over budget.)
+		if budget > 0 && c.BasePrice > budget {
 			continue
 		}
 		ideal = append(ideal, c)
@@ -968,6 +980,28 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 		// A3 — always surface the body types we DO carry here.
 		if bts := bodyTypesPresent(base); len(bts) > 0 {
 			meta["available_body_types"] = bts
+		}
+		// Budget-only search (no body/tier/model anchor): honor the budget BEFORE the
+		// broad ladder. Previously this fell through to StatusUpsell over ALL of base,
+		// so "anything under 1300" answered "Here are some of our available options"
+		// starting at 1900 — and StatusAboveBudget was unreachable on this path.
+		if budget > 0 && query == "" && tier == "" {
+			var inBand []Car
+			for _, c := range base {
+				if priceOK(c.BasePrice) && c.BasePrice <= bandCeiling(budget) {
+					inBand = append(inBand, c)
+				}
+			}
+			if len(inBand) > 0 {
+				g := groupResults(inBand)
+				sortByCloseness(g, budget)
+				return SearchResult{Results: capN(g, 4), Status: StatusAlternative, Meta: meta,
+					Message: "Here are options close to your budget."}
+			}
+			min, _ := priceRange(base)
+			meta["cheapest"] = min
+			return SearchResult{Results: capN(sortedAsc(groupResults(base)), 4), Status: StatusAboveBudget, Meta: meta,
+				Message: fmt.Sprintf("The options I have start around %s Saudi Riyaals, a bit above your budget.", arMoneyWords(min))}
 		}
 		// A segment/tier (e.g. bare "Luxury") with no in-product match and no
 		// inferable body_type: report unavailable + where it exists (no handoff).
@@ -1028,8 +1062,11 @@ func filterCars(req SearchRequest, inv []Car, bodyByModel map[string]string) Sea
 		meta["relaxed_filters"] = relaxed
 	}
 
-	// STS: no band — closest weekly price (budget optional).
-	if isSTS {
+	// STS with NO budget: cheapest-first weekly options (unchanged behavior).
+	// With a budget, STS now flows into the shared band logic below, so a weekly
+	// budget is honored (in-band → Alternative, all above band → Only Above Budget)
+	// instead of being silently discarded.
+	if isSTS && budget <= 0 {
 		return SearchResult{Results: sortAndCap(groupResults(cand), budget, true),
 			Status: StatusAlternative, Meta: meta,
 			Message: "Here are " + target + " options I can offer."}

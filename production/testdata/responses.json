@@ -49,6 +49,7 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "ألف وتسعمية وخمسين",
       "message": "I have what you're looking for.",
       "results": [
         {
@@ -57,23 +58,23 @@
             "Gray",
             "Silver"
           ],
-          "available_contract_lengths": [
-            1,
-            30
+          "available_contract_lengths_spoken": [
+            "واحد",
+            "ثلاثين"
           ],
-          "base_price": 1950,
+          "base_price_spoken": "ألف وتسعمية وخمسين",
           "body_type": "Sedan",
           "brand": "Toyota",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Toyota Yaris 2026",
+          "description": "Toyota Yaris ألفين وستة وعشرين",
           "features": "",
           "model": "Yaris",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2250,
+          "starter_fee_spoken": "ألفين وميتين وخمسين",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "As Sulimaniyah",
@@ -82,23 +83,23 @@
             "Gray",
             "White"
           ],
-          "available_contract_lengths": [
-            9,
-            36
+          "available_contract_lengths_spoken": [
+            "تسعة",
+            "ستة وثلاثين"
           ],
-          "base_price": 2300,
+          "base_price_spoken": "ألفين وثلاثمية",
           "body_type": "Sedan",
           "brand": "Toyota",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Toyota Yaris 2026",
+          "description": "Toyota Yaris ألفين وستة وعشرين",
           "features": "",
           "model": "Yaris",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2500,
+          "starter_fee_spoken": "ألفين وخمسمية",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "Dhahrat Laban",
@@ -108,49 +109,60 @@
             "Black",
             "White"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2300,
+          "base_price_spoken": "ألفين وثلاثمية",
           "body_type": "SUV",
           "brand": "Toyota",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Toyota Raize 2026",
+          "description": "Toyota Raize ألفين وستة وعشرين",
           "features": "",
           "model": "Raize",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2650,
+          "starter_fee_spoken": "ألفين وستمية وخمسين",
           "tier": "Entry level SUV",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "An Nahdah",
           "available_colors": [
             "Silver"
           ],
-          "available_contract_lengths": [
-            30
+          "available_contract_lengths_spoken": [
+            "ثلاثين"
           ],
-          "base_price": 2300,
+          "base_price_spoken": "ألفين وثلاثمية",
           "body_type": "Sedan",
           "brand": "Toyota",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Toyota Yaris 2026",
+          "description": "Toyota Yaris ألفين وستة وعشرين",
           "features": "",
           "model": "Yaris",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2550,
+          "starter_fee_spoken": "ألفين وخمسمية وخمسين",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Ideal Match Found"
     },
-    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Toyota Yaris 2026\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"year\":2026,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1950,\"starter_fee\":2250,\"area\":\"Suwaidi\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\",\"Silver\"],\"available_contract_lengths\":[1,30],\"features\":\"\"},{\"description\":\"Toyota Yaris 2026\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2300,\"starter_fee\":2500,\"area\":\"As Sulimaniyah\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"White\"],\"available_contract_lengths\":[9,36],\"features\":\"\"},{\"description\":\"Toyota Raize 2026\",\"brand\":\"Toyota\",\"model\":\"Raize\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2300,\"starter_fee\":2650,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"Black\",\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Toyota Yaris 2026\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"year\":2026,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2300,\"starter_fee\":2550,\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\"],\"available_contract_lengths\":[30],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ألف وتسعمية وخمسين\",\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Toyota Yaris ألفين وستة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Suwaidi\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\",\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألف وتسعمية وخمسين\",\"starter_fee_spoken\":\"ألفين وميتين وخمسين\",\"available_contract_lengths_spoken\":[\"واحد\",\"ثلاثين\"]},{\"description\":\"Toyota Yaris ألفين وستة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"As Sulimaniyah\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وثلاثمية\",\"starter_fee_spoken\":\"ألفين وخمسمية\",\"available_contract_lengths_spoken\":[\"تسعة\",\"ستة وثلاثين\"]},{\"description\":\"Toyota Raize ألفين وستة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Raize\",\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"Black\",\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وثلاثمية\",\"starter_fee_spoken\":\"ألفين وستمية وخمسين\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"Toyota Yaris ألفين وستة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وثلاثمية\",\"starter_fee_spoken\":\"ألفين وخمسمية وخمسين\",\"available_contract_lengths_spoken\":[\"ثلاثين\"]}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Ideal Match Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -163,6 +175,7 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "ألف وتسعمية وخمسين",
       "message": "I have what you're looking for.",
       "results": [
         {
@@ -171,23 +184,23 @@
             "Gray",
             "Silver"
           ],
-          "available_contract_lengths": [
-            1,
-            30
+          "available_contract_lengths_spoken": [
+            "واحد",
+            "ثلاثين"
           ],
-          "base_price": 1950,
+          "base_price_spoken": "ألف وتسعمية وخمسين",
           "body_type": "Sedan",
           "brand": "Toyota",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Toyota Yaris 2026",
+          "description": "Toyota Yaris ألفين وستة وعشرين",
           "features": "",
           "model": "Yaris",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2250,
+          "starter_fee_spoken": "ألفين وميتين وخمسين",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "As Sulimaniyah",
@@ -196,50 +209,61 @@
             "Gray",
             "White"
           ],
-          "available_contract_lengths": [
-            9,
-            36
+          "available_contract_lengths_spoken": [
+            "تسعة",
+            "ستة وثلاثين"
           ],
-          "base_price": 2300,
+          "base_price_spoken": "ألفين وثلاثمية",
           "body_type": "Sedan",
           "brand": "Toyota",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Toyota Yaris 2026",
+          "description": "Toyota Yaris ألفين وستة وعشرين",
           "features": "",
           "model": "Yaris",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2500,
+          "starter_fee_spoken": "ألفين وخمسمية",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "An Nahdah",
           "available_colors": [
             "Silver"
           ],
-          "available_contract_lengths": [
-            30
+          "available_contract_lengths_spoken": [
+            "ثلاثين"
           ],
-          "base_price": 2300,
+          "base_price_spoken": "ألفين وثلاثمية",
           "body_type": "Sedan",
           "brand": "Toyota",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Toyota Yaris 2026",
+          "description": "Toyota Yaris ألفين وستة وعشرين",
           "features": "",
           "model": "Yaris",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2550,
+          "starter_fee_spoken": "ألفين وخمسمية وخمسين",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Ideal Match Found"
     },
-    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Toyota Yaris 2026\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"year\":2026,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1950,\"starter_fee\":2250,\"area\":\"Suwaidi\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\",\"Silver\"],\"available_contract_lengths\":[1,30],\"features\":\"\"},{\"description\":\"Toyota Yaris 2026\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2300,\"starter_fee\":2500,\"area\":\"As Sulimaniyah\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"White\"],\"available_contract_lengths\":[9,36],\"features\":\"\"},{\"description\":\"Toyota Yaris 2026\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"year\":2026,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2300,\"starter_fee\":2550,\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\"],\"available_contract_lengths\":[30],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ألف وتسعمية وخمسين\",\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Toyota Yaris ألفين وستة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Suwaidi\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\",\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألف وتسعمية وخمسين\",\"starter_fee_spoken\":\"ألفين وميتين وخمسين\",\"available_contract_lengths_spoken\":[\"واحد\",\"ثلاثين\"]},{\"description\":\"Toyota Yaris ألفين وستة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"As Sulimaniyah\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وثلاثمية\",\"starter_fee_spoken\":\"ألفين وخمسمية\",\"available_contract_lengths_spoken\":[\"تسعة\",\"ستة وثلاثين\"]},{\"description\":\"Toyota Yaris ألفين وستة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وثلاثمية\",\"starter_fee_spoken\":\"ألفين وخمسمية وخمسين\",\"available_contract_lengths_spoken\":[\"ثلاثين\"]}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Ideal Match Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -253,75 +277,77 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "ألفين وثلاثمية",
       "message": "I have what you're looking for.",
       "results": [
         {
-          "area": "Al Quds",
+          "area": "Dhahrat Laban",
           "available_colors": [
-            "White",
+            "Silver",
             "Gray",
-            "Silver"
+            "Black",
+            "White"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2850,
+          "base_price_spoken": "ألفين وثلاثمية",
           "body_type": "SUV",
-          "brand": "Geely",
+          "brand": "Toyota",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Geely Cityray 2026",
+          "description": "Toyota Raize ألفين وستة وعشرين",
           "features": "",
-          "model": "Cityray",
+          "model": "Raize",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 1800,
-          "tier": "Midsize SUV",
-          "year": 2026
+          "starter_fee_spoken": "ألفين وستمية وخمسين",
+          "tier": "Entry level SUV",
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
-          "area": "Al Faisaliyyah",
+          "area": "Al Quds",
           "available_colors": [
             "Black"
           ],
-          "available_contract_lengths": [
-            6
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2850,
+          "base_price_spoken": "ألفين وأربعمية",
           "body_type": "SUV",
-          "brand": "Peugeot",
+          "brand": "GAC",
           "city": "Riyadh",
-          "condition": "USED",
-          "description": "Peugeot 2008 2023",
+          "condition": "NEW",
+          "description": "GAC GS3 ألفين وستة وعشرين",
           "features": "",
-          "model": "2008",
+          "model": "GS3",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 3275,
+          "starter_fee_spoken": "ألفين وثمنمية",
           "tier": "Entry level SUV",
-          "year": 2023
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "King Faisal",
           "available_colors": [
-            "White"
+            "Red"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2850,
+          "base_price_spoken": "ألفين وأربعمية",
           "body_type": "SUV",
           "brand": "Kia",
           "city": "Riyadh",
-          "condition": "NEW",
-          "description": "Kia Seltos 2023",
+          "condition": "USED",
+          "description": "Kia Seltos ألفين وثلاثة وعشرين",
           "features": "",
           "model": "Seltos",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2850,
+          "starter_fee_spoken": "ألفين وسبعمية وخمسين",
           "tier": "Entry level SUV",
-          "year": 2023
+          "year_spoken": "ألفين وثلاثة وعشرين"
         },
         {
           "area": "Dhahrat Laban",
@@ -330,27 +356,38 @@
             "White",
             "Gray"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2825,
+          "base_price_spoken": "ألفين وثمنمية وخمسة وعشرين",
           "body_type": "SUV",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Hyundai Creta 2026",
+          "description": "Hyundai Creta ألفين وستة وعشرين",
           "features": "",
           "model": "Creta",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 3100,
+          "starter_fee_spoken": "ثلاثة آلاف ومية",
           "tier": "Entry level SUV",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Ideal Match Found"
     },
-    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Geely Cityray 2026\",\"brand\":\"Geely\",\"model\":\"Cityray\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Midsize SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2850,\"starter_fee\":1800,\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"White\",\"Gray\",\"Silver\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Peugeot 2008 2023\",\"brand\":\"Peugeot\",\"model\":\"2008\",\"year\":2023,\"condition\":\"USED\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2850,\"starter_fee\":3275,\"area\":\"Al Faisaliyyah\",\"city\":\"Riyadh\",\"available_colors\":[\"Black\"],\"available_contract_lengths\":[6],\"features\":\"\"},{\"description\":\"Kia Seltos 2023\",\"brand\":\"Kia\",\"model\":\"Seltos\",\"year\":2023,\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2850,\"starter_fee\":2850,\"area\":\"King Faisal\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Hyundai Creta 2026\",\"brand\":\"Hyundai\",\"model\":\"Creta\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2825,\"starter_fee\":3100,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"White\",\"Gray\"],\"available_contract_lengths\":[36],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ألفين وثلاثمية\",\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Toyota Raize ألفين وستة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Raize\",\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"Black\",\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وثلاثمية\",\"starter_fee_spoken\":\"ألفين وستمية وخمسين\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"GAC GS3 ألفين وستة وعشرين\",\"brand\":\"GAC\",\"model\":\"GS3\",\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Black\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وأربعمية\",\"starter_fee_spoken\":\"ألفين وثمنمية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"Kia Seltos ألفين وثلاثة وعشرين\",\"brand\":\"Kia\",\"model\":\"Seltos\",\"condition\":\"USED\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"King Faisal\",\"city\":\"Riyadh\",\"available_colors\":[\"Red\"],\"features\":\"\",\"year_spoken\":\"ألفين وثلاثة وعشرين\",\"base_price_spoken\":\"ألفين وأربعمية\",\"starter_fee_spoken\":\"ألفين وسبعمية وخمسين\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"Hyundai Creta ألفين وستة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Creta\",\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"White\",\"Gray\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وثمنمية وخمسة وعشرين\",\"starter_fee_spoken\":\"ثلاثة آلاف ومية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Ideal Match Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -365,6 +402,7 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "ألفين وثلاثمية وخمسين",
       "message": "Here are Sedan options close to your budget.",
       "results": [
         {
@@ -372,23 +410,23 @@
           "available_colors": [
             "Gray"
           ],
-          "available_contract_lengths": [
-            24,
-            30
+          "available_contract_lengths_spoken": [
+            "أربعة وعشرين",
+            "ثلاثين"
           ],
-          "base_price": 2500,
+          "base_price_spoken": "ألفين وخمسمية",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Hyundai Elantra 2026",
+          "description": "Hyundai Elantra ألفين وستة وعشرين",
           "features": "",
           "model": "Elantra",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2875,
+          "starter_fee_spoken": "ألفين وثمنمية وخمسة وسبعين",
           "tier": "Midsize Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "Dhahrat Laban",
@@ -397,44 +435,44 @@
             "Gray",
             "White"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2500,
+          "base_price_spoken": "ألفين وخمسمية",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Hyundai Accent 2026",
+          "description": "Hyundai Accent ألفين وستة وعشرين",
           "features": "",
           "model": "Accent",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2700,
+          "starter_fee_spoken": "ألفين وسبعمية",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "As Sulimaniyah",
           "available_colors": [
             "White"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2400,
+          "base_price_spoken": "ألفين وأربعمية",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Hyundai Accent 2025",
+          "description": "Hyundai Accent ألفين وخمسة وعشرين",
           "features": "",
           "model": "Accent",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2700,
+          "starter_fee_spoken": "ألفين وسبعمية",
           "tier": "Entry level Sedan",
-          "year": 2025
+          "year_spoken": "ألفين وخمسة وعشرين"
         },
         {
           "area": "Al Quds",
@@ -442,28 +480,39 @@
             "Gray",
             "White"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2350,
+          "base_price_spoken": "ألفين وثلاثمية وخمسين",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Hyundai Accent 2026",
+          "description": "Hyundai Accent ألفين وستة وعشرين",
           "features": "",
           "model": "Accent",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 1400,
+          "starter_fee_spoken": "ألف وأربعمية",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Alternative Found",
       "target_body_type": "Sedan"
     },
-    "raw_body": "{\"message\":\"Here are Sedan options close to your budget.\",\"results\":[{\"description\":\"Hyundai Elantra 2026\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"year\":2026,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2500,\"starter_fee\":2875,\"area\":\"Ar Rimal\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\"],\"available_contract_lengths\":[24,30],\"features\":\"\"},{\"description\":\"Hyundai Accent 2026\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2500,\"starter_fee\":2700,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Hyundai Accent 2025\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2400,\"starter_fee\":2700,\"area\":\"As Sulimaniyah\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Hyundai Accent 2026\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2350,\"starter_fee\":1400,\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\",\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"}],\"status\":\"Alternative Found\",\"target_body_type\":\"Sedan\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ألفين وثلاثمية وخمسين\",\"message\":\"Here are Sedan options close to your budget.\",\"results\":[{\"description\":\"Hyundai Elantra ألفين وستة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Ar Rimal\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وخمسمية\",\"starter_fee_spoken\":\"ألفين وثمنمية وخمسة وسبعين\",\"available_contract_lengths_spoken\":[\"أربعة وعشرين\",\"ثلاثين\"]},{\"description\":\"Hyundai Accent ألفين وستة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وخمسمية\",\"starter_fee_spoken\":\"ألفين وسبعمية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"Hyundai Accent ألفين وخمسة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"As Sulimaniyah\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وخمسة وعشرين\",\"base_price_spoken\":\"ألفين وأربعمية\",\"starter_fee_spoken\":\"ألفين وسبعمية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"Hyundai Accent ألفين وستة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\",\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وثلاثمية وخمسين\",\"starter_fee_spoken\":\"ألف وأربعمية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Alternative Found\",\"target_body_type\":\"Sedan\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -485,9 +534,20 @@
       ],
       "message": "Which body type would you like — for example sedan, SUV, or hatchback?",
       "results": [],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
+      ],
       "status": "Need Body Type"
     },
-    "raw_body": "{\"available_body_types\":[\"Crossover\",\"Hatchback\",\"Pickup\",\"SUV\",\"Sedan\"],\"message\":\"Which body type would you like — for example sedan, SUV, or hatchback?\",\"results\":[],\"status\":\"Need Body Type\"}\n",
+    "raw_body": "{\"available_body_types\":[\"Crossover\",\"Hatchback\",\"Pickup\",\"SUV\",\"Sedan\"],\"message\":\"Which body type would you like — for example sedan, SUV, or hatchback?\",\"results\":[],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Need Body Type\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -500,6 +560,7 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "ألف وسبعمية",
       "message": "I have what you're looking for.",
       "results": [
         {
@@ -508,95 +569,106 @@
             "White",
             "Silver"
           ],
-          "available_contract_lengths": [
-            1,
-            24,
-            30
+          "available_contract_lengths_spoken": [
+            "واحد",
+            "أربعة وعشرين",
+            "ثلاثين"
           ],
-          "base_price": 1700,
+          "base_price_spoken": "ألف وسبعمية",
           "body_type": "Sedan",
           "brand": "MG",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "MG 5 2025",
+          "description": "MG 5 ألفين وخمسة وعشرين",
           "features": "",
           "model": "5",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 1950,
+          "starter_fee_spoken": "ألف وتسعمية وخمسين",
           "tier": "Entry level Sedan",
-          "year": 2025
+          "year_spoken": "ألفين وخمسة وعشرين"
         },
         {
           "area": "Al Uraija",
           "available_colors": [
             "White"
           ],
-          "available_contract_lengths": [
-            18
+          "available_contract_lengths_spoken": [
+            "ثمانية عشر"
           ],
-          "base_price": 1775,
+          "base_price_spoken": "ألف وسبعمية وخمسة وسبعين",
           "body_type": "Sedan",
           "brand": "Changan",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Changan Alsvin 2024",
+          "description": "Changan Alsvin ألفين وأربعة وعشرين",
           "features": "",
           "model": "Alsvin",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 1975,
+          "starter_fee_spoken": "ألف وتسعمية وخمسة وسبعين",
           "tier": "Entry level Sedan",
-          "year": 2024
+          "year_spoken": "ألفين وأربعة وعشرين"
         },
         {
           "area": "Dhahrat Laban",
           "available_colors": [
             "Silver"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 1900,
+          "base_price_spoken": "ألف وتسعمية",
           "body_type": "Sedan",
           "brand": "MG",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "MG 5 2024",
+          "description": "MG 5 ألفين وأربعة وعشرين",
           "features": "",
           "model": "5",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2100,
+          "starter_fee_spoken": "ألفين ومية",
           "tier": "Entry level Sedan",
-          "year": 2024
+          "year_spoken": "ألفين وأربعة وعشرين"
         },
         {
           "area": "Al Quds",
           "available_colors": [
             "White"
           ],
-          "available_contract_lengths": [
-            24
+          "available_contract_lengths_spoken": [
+            "أربعة وعشرين"
           ],
-          "base_price": 1900,
+          "base_price_spoken": "ألف وتسعمية",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Hyundai Accent 2025",
+          "description": "Hyundai Accent ألفين وخمسة وعشرين",
           "features": "",
           "model": "Accent",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2175,
+          "starter_fee_spoken": "ألفين ومية وخمسة وسبعين",
           "tier": "Entry level Sedan",
-          "year": 2025
+          "year_spoken": "ألفين وخمسة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Ideal Match Found"
     },
-    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"MG 5 2025\",\"brand\":\"MG\",\"model\":\"5\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1700,\"starter_fee\":1950,\"area\":\"Khorreiss Road\",\"city\":\"Riyadh\",\"available_colors\":[\"White\",\"Silver\"],\"available_contract_lengths\":[1,24,30],\"features\":\"\"},{\"description\":\"Changan Alsvin 2024\",\"brand\":\"Changan\",\"model\":\"Alsvin\",\"year\":2024,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1775,\"starter_fee\":1975,\"area\":\"Al Uraija\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[18],\"features\":\"\"},{\"description\":\"MG 5 2024\",\"brand\":\"MG\",\"model\":\"5\",\"year\":2024,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1900,\"starter_fee\":2100,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Hyundai Accent 2025\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1900,\"starter_fee\":2175,\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[24],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ألف وسبعمية\",\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"MG 5 ألفين وخمسة وعشرين\",\"brand\":\"MG\",\"model\":\"5\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Khorreiss Road\",\"city\":\"Riyadh\",\"available_colors\":[\"White\",\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين وخمسة وعشرين\",\"base_price_spoken\":\"ألف وسبعمية\",\"starter_fee_spoken\":\"ألف وتسعمية وخمسين\",\"available_contract_lengths_spoken\":[\"واحد\",\"أربعة وعشرين\",\"ثلاثين\"]},{\"description\":\"Changan Alsvin ألفين وأربعة وعشرين\",\"brand\":\"Changan\",\"model\":\"Alsvin\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Al Uraija\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وأربعة وعشرين\",\"base_price_spoken\":\"ألف وسبعمية وخمسة وسبعين\",\"starter_fee_spoken\":\"ألف وتسعمية وخمسة وسبعين\",\"available_contract_lengths_spoken\":[\"ثمانية عشر\"]},{\"description\":\"MG 5 ألفين وأربعة وعشرين\",\"brand\":\"MG\",\"model\":\"5\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين وأربعة وعشرين\",\"base_price_spoken\":\"ألف وتسعمية\",\"starter_fee_spoken\":\"ألفين ومية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"Hyundai Accent ألفين وخمسة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وخمسة وعشرين\",\"base_price_spoken\":\"ألف وتسعمية\",\"starter_fee_spoken\":\"ألفين ومية وخمسة وسبعين\",\"available_contract_lengths_spoken\":[\"أربعة وعشرين\"]}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Ideal Match Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -610,9 +682,10 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
-      "message": "Here are a few Sedan options from 1700 to 2925 Saudi Riyaals — want me to narrow to a price, or shall I tell you about these?",
-      "price_max": 2925,
-      "price_min": 1700,
+      "cheapest_spoken": "ألف وسبعمية",
+      "message": "Here are a few Sedan options from ألف وسبعمية to ألفين وتسعمية وخمسة وعشرين Saudi Riyaals — want me to narrow to a price, or shall I tell you about these?",
+      "price_max_spoken": "ألفين وتسعمية وخمسة وعشرين",
+      "price_min_spoken": "ألف وسبعمية",
       "results": [
         {
           "area": "Khorreiss Road",
@@ -620,68 +693,68 @@
             "White",
             "Silver"
           ],
-          "available_contract_lengths": [
-            1,
-            24,
-            30
+          "available_contract_lengths_spoken": [
+            "واحد",
+            "أربعة وعشرين",
+            "ثلاثين"
           ],
-          "base_price": 1700,
+          "base_price_spoken": "ألف وسبعمية",
           "body_type": "Sedan",
           "brand": "MG",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "MG 5 2025",
+          "description": "MG 5 ألفين وخمسة وعشرين",
           "features": "",
           "model": "5",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 1950,
+          "starter_fee_spoken": "ألف وتسعمية وخمسين",
           "tier": "Entry level Sedan",
-          "year": 2025
+          "year_spoken": "ألفين وخمسة وعشرين"
         },
         {
           "area": "Dhahrat Laban",
           "available_colors": [
             "White"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2000,
+          "base_price_spoken": "ألفين",
           "body_type": "Sedan",
           "brand": "Kia",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Kia Pegas 2025",
+          "description": "Kia Pegas ألفين وخمسة وعشرين",
           "features": "",
           "model": "Pegas",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2200,
+          "starter_fee_spoken": "ألفين وميتين",
           "tier": "Entry level Sedan",
-          "year": 2025
+          "year_spoken": "ألفين وخمسة وعشرين"
         },
         {
           "area": "An Nahdah",
           "available_colors": [
             "Silver"
           ],
-          "available_contract_lengths": [
-            30
+          "available_contract_lengths_spoken": [
+            "ثلاثين"
           ],
-          "base_price": 2300,
+          "base_price_spoken": "ألفين وثلاثمية",
           "body_type": "Sedan",
           "brand": "Toyota",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Toyota Yaris 2026",
+          "description": "Toyota Yaris ألفين وستة وعشرين",
           "features": "",
           "model": "Yaris",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2550,
+          "starter_fee_spoken": "ألفين وخمسمية وخمسين",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "Al Quds",
@@ -690,28 +763,39 @@
             "White",
             "Gray"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2925,
+          "base_price_spoken": "ألفين وتسعمية وخمسة وعشرين",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Hyundai Elantra 2026",
+          "description": "Hyundai Elantra ألفين وستة وعشرين",
           "features": "High Spec",
           "model": "Elantra",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 1700,
+          "starter_fee_spoken": "ألف وسبعمية",
           "tier": "Midsize Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Alternative Found",
       "target_body_type": "Sedan"
     },
-    "raw_body": "{\"message\":\"Here are a few Sedan options from 1700 to 2925 Saudi Riyaals — want me to narrow to a price, or shall I tell you about these?\",\"price_max\":2925,\"price_min\":1700,\"results\":[{\"description\":\"MG 5 2025\",\"brand\":\"MG\",\"model\":\"5\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":1700,\"starter_fee\":1950,\"area\":\"Khorreiss Road\",\"city\":\"Riyadh\",\"available_colors\":[\"White\",\"Silver\"],\"available_contract_lengths\":[1,24,30],\"features\":\"\"},{\"description\":\"Kia Pegas 2025\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2000,\"starter_fee\":2200,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Toyota Yaris 2026\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"year\":2026,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2300,\"starter_fee\":2550,\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\"],\"available_contract_lengths\":[30],\"features\":\"\"},{\"description\":\"Hyundai Elantra 2026\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2925,\"starter_fee\":1700,\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"White\",\"Gray\"],\"available_contract_lengths\":[36],\"features\":\"High Spec\"}],\"status\":\"Alternative Found\",\"target_body_type\":\"Sedan\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ألف وسبعمية\",\"message\":\"Here are a few Sedan options from ألف وسبعمية to ألفين وتسعمية وخمسة وعشرين Saudi Riyaals — want me to narrow to a price, or shall I tell you about these?\",\"price_max_spoken\":\"ألفين وتسعمية وخمسة وعشرين\",\"price_min_spoken\":\"ألف وسبعمية\",\"results\":[{\"description\":\"MG 5 ألفين وخمسة وعشرين\",\"brand\":\"MG\",\"model\":\"5\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Khorreiss Road\",\"city\":\"Riyadh\",\"available_colors\":[\"White\",\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين وخمسة وعشرين\",\"base_price_spoken\":\"ألف وسبعمية\",\"starter_fee_spoken\":\"ألف وتسعمية وخمسين\",\"available_contract_lengths_spoken\":[\"واحد\",\"أربعة وعشرين\",\"ثلاثين\"]},{\"description\":\"Kia Pegas ألفين وخمسة وعشرين\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وخمسة وعشرين\",\"base_price_spoken\":\"ألفين\",\"starter_fee_spoken\":\"ألفين وميتين\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"Toyota Yaris ألفين وستة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وثلاثمية\",\"starter_fee_spoken\":\"ألفين وخمسمية وخمسين\",\"available_contract_lengths_spoken\":[\"ثلاثين\"]},{\"description\":\"Hyundai Elantra ألفين وستة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"White\",\"Gray\"],\"features\":\"High Spec\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وتسعمية وخمسة وعشرين\",\"starter_fee_spoken\":\"ألف وسبعمية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Alternative Found\",\"target_body_type\":\"Sedan\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -725,8 +809,8 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
-      "cheapest": 2300,
-      "message": "The SUV options I have start around 2300 Saudi Riyaals, a bit above your budget.",
+      "cheapest_spoken": "ألفين وثلاثمية",
+      "message": "The SUV options I have start around ألفين وثلاثمية Saudi Riyaals, a bit above your budget.",
       "results": [
         {
           "area": "Dhahrat Laban",
@@ -736,66 +820,66 @@
             "Black",
             "White"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2300,
+          "base_price_spoken": "ألفين وثلاثمية",
           "body_type": "SUV",
           "brand": "Toyota",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Toyota Raize 2026",
+          "description": "Toyota Raize ألفين وستة وعشرين",
           "features": "",
           "model": "Raize",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2650,
+          "starter_fee_spoken": "ألفين وستمية وخمسين",
           "tier": "Entry level SUV",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "Al Quds",
           "available_colors": [
             "Black"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2400,
+          "base_price_spoken": "ألفين وأربعمية",
           "body_type": "SUV",
           "brand": "GAC",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "GAC GS3 2026",
+          "description": "GAC GS3 ألفين وستة وعشرين",
           "features": "",
           "model": "GS3",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2800,
+          "starter_fee_spoken": "ألفين وثمنمية",
           "tier": "Entry level SUV",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "King Faisal",
           "available_colors": [
             "Red"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2400,
+          "base_price_spoken": "ألفين وأربعمية",
           "body_type": "SUV",
           "brand": "Kia",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Kia Seltos 2023",
+          "description": "Kia Seltos ألفين وثلاثة وعشرين",
           "features": "",
           "model": "Seltos",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2750,
+          "starter_fee_spoken": "ألفين وسبعمية وخمسين",
           "tier": "Entry level SUV",
-          "year": 2023
+          "year_spoken": "ألفين وثلاثة وعشرين"
         },
         {
           "area": "Dhahrat Laban",
@@ -804,28 +888,39 @@
             "White",
             "Gray"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2825,
+          "base_price_spoken": "ألفين وثمنمية وخمسة وعشرين",
           "body_type": "SUV",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Hyundai Creta 2026",
+          "description": "Hyundai Creta ألفين وستة وعشرين",
           "features": "",
           "model": "Creta",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 3100,
+          "starter_fee_spoken": "ثلاثة آلاف ومية",
           "tier": "Entry level SUV",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Only Above Budget",
       "target_body_type": "SUV"
     },
-    "raw_body": "{\"cheapest\":2300,\"message\":\"The SUV options I have start around 2300 Saudi Riyaals, a bit above your budget.\",\"results\":[{\"description\":\"Toyota Raize 2026\",\"brand\":\"Toyota\",\"model\":\"Raize\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2300,\"starter_fee\":2650,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"Black\",\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"GAC GS3 2026\",\"brand\":\"GAC\",\"model\":\"GS3\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2400,\"starter_fee\":2800,\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Black\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Kia Seltos 2023\",\"brand\":\"Kia\",\"model\":\"Seltos\",\"year\":2023,\"condition\":\"USED\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2400,\"starter_fee\":2750,\"area\":\"King Faisal\",\"city\":\"Riyadh\",\"available_colors\":[\"Red\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Hyundai Creta 2026\",\"brand\":\"Hyundai\",\"model\":\"Creta\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2825,\"starter_fee\":3100,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"White\",\"Gray\"],\"available_contract_lengths\":[36],\"features\":\"\"}],\"status\":\"Only Above Budget\",\"target_body_type\":\"SUV\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ألفين وثلاثمية\",\"message\":\"The SUV options I have start around ألفين وثلاثمية Saudi Riyaals, a bit above your budget.\",\"results\":[{\"description\":\"Toyota Raize ألفين وستة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Raize\",\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"Black\",\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وثلاثمية\",\"starter_fee_spoken\":\"ألفين وستمية وخمسين\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"GAC GS3 ألفين وستة وعشرين\",\"brand\":\"GAC\",\"model\":\"GS3\",\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Black\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وأربعمية\",\"starter_fee_spoken\":\"ألفين وثمنمية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"Kia Seltos ألفين وثلاثة وعشرين\",\"brand\":\"Kia\",\"model\":\"Seltos\",\"condition\":\"USED\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"King Faisal\",\"city\":\"Riyadh\",\"available_colors\":[\"Red\"],\"features\":\"\",\"year_spoken\":\"ألفين وثلاثة وعشرين\",\"base_price_spoken\":\"ألفين وأربعمية\",\"starter_fee_spoken\":\"ألفين وسبعمية وخمسين\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"Hyundai Creta ألفين وستة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Creta\",\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"White\",\"Gray\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وثمنمية وخمسة وعشرين\",\"starter_fee_spoken\":\"ثلاثة آلاف ومية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Only Above Budget\",\"target_body_type\":\"SUV\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -854,9 +949,20 @@
       ],
       "message": "I don't have Luxury options in Riyadh on the Subscribe to Own plan right now.",
       "results": [],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
+      ],
       "status": "No Body Type Match"
     },
-    "raw_body": "{\"also_in_cities\":[\"Jeddah\"],\"also_in_products\":[\"MONTHLY\",\"STS\"],\"available_body_types\":[\"Crossover\",\"Hatchback\",\"Pickup\",\"SUV\",\"Sedan\"],\"message\":\"I don't have Luxury options in Riyadh on the Subscribe to Own plan right now.\",\"results\":[],\"status\":\"No Body Type Match\"}\n",
+    "raw_body": "{\"also_in_cities\":[\"Jeddah\"],\"also_in_products\":[\"MONTHLY\",\"STS\"],\"available_body_types\":[\"Crossover\",\"Hatchback\",\"Pickup\",\"SUV\",\"Sedan\"],\"message\":\"I don't have Luxury options in Riyadh on the Subscribe to Own plan right now.\",\"results\":[],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"No Body Type Match\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -870,6 +976,7 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "ألفين",
       "message": "I have what you're looking for.",
       "results": [
         {
@@ -877,93 +984,104 @@
           "available_colors": [
             "White"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2000,
+          "base_price_spoken": "ألفين",
           "body_type": "Sedan",
           "brand": "Kia",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Kia Pegas 2025",
+          "description": "Kia Pegas ألفين وخمسة وعشرين",
           "features": "",
           "model": "Pegas",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2200,
+          "starter_fee_spoken": "ألفين وميتين",
           "tier": "Entry level Sedan",
-          "year": 2025
+          "year_spoken": "ألفين وخمسة وعشرين"
         },
         {
           "area": "Ad Dhubbat",
           "available_colors": [
             "White"
           ],
-          "available_contract_lengths": [
-            30
+          "available_contract_lengths_spoken": [
+            "ثلاثين"
           ],
-          "base_price": 2050,
+          "base_price_spoken": "ألفين وخمسين",
           "body_type": "Sedan",
           "brand": "MG",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "MG 5 2025",
+          "description": "MG 5 ألفين وخمسة وعشرين",
           "features": "",
           "model": "5",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2275,
+          "starter_fee_spoken": "ألفين وميتين وخمسة وسبعين",
           "tier": "Entry level Sedan",
-          "year": 2025
+          "year_spoken": "ألفين وخمسة وعشرين"
         },
         {
           "area": "Dhahrat Laban",
           "available_colors": [
             "White"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2050,
+          "base_price_spoken": "ألفين وخمسين",
           "body_type": "Sedan",
           "brand": "MG",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "MG 5 2025",
+          "description": "MG 5 ألفين وخمسة وعشرين",
           "features": "",
           "model": "5",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2575,
+          "starter_fee_spoken": "ألفين وخمسمية وخمسة وسبعين",
           "tier": "Entry level Sedan",
-          "year": 2025
+          "year_spoken": "ألفين وخمسة وعشرين"
         },
         {
           "area": "An Nahdah",
           "available_colors": [
             "Gray"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2100,
+          "base_price_spoken": "ألفين ومية",
           "body_type": "Sedan",
           "brand": "Kia",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Kia Pegas 2025",
+          "description": "Kia Pegas ألفين وخمسة وعشرين",
           "features": "",
           "model": "Pegas",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2300,
+          "starter_fee_spoken": "ألفين وثلاثمية",
           "tier": "Entry level Sedan",
-          "year": 2025
+          "year_spoken": "ألفين وخمسة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Ideal Match Found"
     },
-    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Kia Pegas 2025\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2000,\"starter_fee\":2200,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"MG 5 2025\",\"brand\":\"MG\",\"model\":\"5\",\"year\":2025,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2050,\"starter_fee\":2275,\"area\":\"Ad Dhubbat\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[30],\"features\":\"\"},{\"description\":\"MG 5 2025\",\"brand\":\"MG\",\"model\":\"5\",\"year\":2025,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2050,\"starter_fee\":2575,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"},{\"description\":\"Kia Pegas 2025\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2025,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2100,\"starter_fee\":2300,\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\"],\"available_contract_lengths\":[36],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ألفين\",\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Kia Pegas ألفين وخمسة وعشرين\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وخمسة وعشرين\",\"base_price_spoken\":\"ألفين\",\"starter_fee_spoken\":\"ألفين وميتين\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"MG 5 ألفين وخمسة وعشرين\",\"brand\":\"MG\",\"model\":\"5\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Ad Dhubbat\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وخمسة وعشرين\",\"base_price_spoken\":\"ألفين وخمسين\",\"starter_fee_spoken\":\"ألفين وميتين وخمسة وسبعين\",\"available_contract_lengths_spoken\":[\"ثلاثين\"]},{\"description\":\"MG 5 ألفين وخمسة وعشرين\",\"brand\":\"MG\",\"model\":\"5\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وخمسة وعشرين\",\"base_price_spoken\":\"ألفين وخمسين\",\"starter_fee_spoken\":\"ألفين وخمسمية وخمسة وسبعين\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"Kia Pegas ألفين وخمسة وعشرين\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\"],\"features\":\"\",\"year_spoken\":\"ألفين وخمسة وعشرين\",\"base_price_spoken\":\"ألفين ومية\",\"starter_fee_spoken\":\"ألفين وثلاثمية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Ideal Match Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -979,6 +1097,7 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "ألفين وخمسمية",
       "message": "Here are Sedan options close to your budget.",
       "relaxed_filters": [
         "condition"
@@ -991,67 +1110,67 @@
             "White",
             "Gray"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2925,
+          "base_price_spoken": "ألفين وتسعمية وخمسة وعشرين",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Hyundai Elantra 2026",
+          "description": "Hyundai Elantra ألفين وستة وعشرين",
           "features": "High Spec",
           "model": "Elantra",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 1700,
+          "starter_fee_spoken": "ألف وسبعمية",
           "tier": "Midsize Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "Ar Rimal",
           "available_colors": [
             "Gray"
           ],
-          "available_contract_lengths": [
-            24
+          "available_contract_lengths_spoken": [
+            "أربعة وعشرين"
           ],
-          "base_price": 2900,
+          "base_price_spoken": "ألفين وتسعمية",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Hyundai Elantra 2026",
+          "description": "Hyundai Elantra ألفين وستة وعشرين",
           "features": "",
           "model": "Elantra",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 3250,
+          "starter_fee_spoken": "ثلاثة آلاف وميتين وخمسين",
           "tier": "Midsize Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "Ar Rimal",
           "available_colors": [
             "Gray"
           ],
-          "available_contract_lengths": [
-            24,
-            30
+          "available_contract_lengths_spoken": [
+            "أربعة وعشرين",
+            "ثلاثين"
           ],
-          "base_price": 2500,
+          "base_price_spoken": "ألفين وخمسمية",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "USED",
-          "description": "Hyundai Elantra 2026",
+          "description": "Hyundai Elantra ألفين وستة وعشرين",
           "features": "",
           "model": "Elantra",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2875,
+          "starter_fee_spoken": "ألفين وثمنمية وخمسة وسبعين",
           "tier": "Midsize Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "Dhahrat Laban",
@@ -1060,28 +1179,39 @@
             "Gray",
             "White"
           ],
-          "available_contract_lengths": [
-            36
+          "available_contract_lengths_spoken": [
+            "ستة وثلاثين"
           ],
-          "base_price": 2500,
+          "base_price_spoken": "ألفين وخمسمية",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Hyundai Accent 2026",
+          "description": "Hyundai Accent ألفين وستة وعشرين",
           "features": "",
           "model": "Accent",
           "price_basis": "monthly",
           "product": "STO",
-          "starter_fee": 2700,
+          "starter_fee_spoken": "ألفين وسبعمية",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Alternative Found",
       "target_body_type": "Sedan"
     },
-    "raw_body": "{\"message\":\"Here are Sedan options close to your budget.\",\"relaxed_filters\":[\"condition\"],\"results\":[{\"description\":\"Hyundai Elantra 2026\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2925,\"starter_fee\":1700,\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"White\",\"Gray\"],\"available_contract_lengths\":[36],\"features\":\"High Spec\"},{\"description\":\"Hyundai Elantra 2026\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"year\":2026,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2900,\"starter_fee\":3250,\"area\":\"Ar Rimal\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\"],\"available_contract_lengths\":[24],\"features\":\"\"},{\"description\":\"Hyundai Elantra 2026\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"year\":2026,\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2500,\"starter_fee\":2875,\"area\":\"Ar Rimal\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\"],\"available_contract_lengths\":[24,30],\"features\":\"\"},{\"description\":\"Hyundai Accent 2026\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"base_price\":2500,\"starter_fee\":2700,\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"White\"],\"available_contract_lengths\":[36],\"features\":\"\"}],\"status\":\"Alternative Found\",\"target_body_type\":\"Sedan\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ألفين وخمسمية\",\"message\":\"Here are Sedan options close to your budget.\",\"relaxed_filters\":[\"condition\"],\"results\":[{\"description\":\"Hyundai Elantra ألفين وستة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Al Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"White\",\"Gray\"],\"features\":\"High Spec\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وتسعمية وخمسة وعشرين\",\"starter_fee_spoken\":\"ألف وسبعمية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]},{\"description\":\"Hyundai Elantra ألفين وستة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Ar Rimal\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وتسعمية\",\"starter_fee_spoken\":\"ثلاثة آلاف وميتين وخمسين\",\"available_contract_lengths_spoken\":[\"أربعة وعشرين\"]},{\"description\":\"Hyundai Elantra ألفين وستة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Elantra\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Midsize Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Ar Rimal\",\"city\":\"Riyadh\",\"available_colors\":[\"Gray\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وخمسمية\",\"starter_fee_spoken\":\"ألفين وثمنمية وخمسة وسبعين\",\"available_contract_lengths_spoken\":[\"أربعة وعشرين\",\"ثلاثين\"]},{\"description\":\"Hyundai Accent ألفين وستة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STO\",\"price_basis\":\"monthly\",\"area\":\"Dhahrat Laban\",\"city\":\"Riyadh\",\"available_colors\":[\"Silver\",\"Gray\",\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ألفين وخمسمية\",\"starter_fee_spoken\":\"ألفين وسبعمية\",\"available_contract_lengths_spoken\":[\"ستة وثلاثين\"]}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Alternative Found\",\"target_body_type\":\"Sedan\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -1100,9 +1230,20 @@
       ],
       "message": "We currently have no cars available in Atlantis on the Subscribe to Own plan. I do have them in Dammam, Jeddah, Riyadh.",
       "results": [],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
+      ],
       "status": "No Cars Found"
     },
-    "raw_body": "{\"also_in_cities\":[\"Dammam\",\"Jeddah\",\"Riyadh\"],\"message\":\"We currently have no cars available in Atlantis on the Subscribe to Own plan. I do have them in Dammam, Jeddah, Riyadh.\",\"results\":[],\"status\":\"No Cars Found\"}\n",
+    "raw_body": "{\"also_in_cities\":[\"Dammam\",\"Jeddah\",\"Riyadh\"],\"message\":\"We currently have no cars available in Atlantis on the Subscribe to Own plan. I do have them in Dammam, Jeddah, Riyadh.\",\"results\":[],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"No Cars Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -1114,6 +1255,7 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "ألف وسبعمية وتسعة وأربعين",
       "message": "I have what you're looking for.",
       "results": [
         {
@@ -1121,85 +1263,92 @@
           "available_colors": [
             "Silver"
           ],
-          "base_price": 1749,
+          "base_price_spoken": "ألف وسبعمية وتسعة وأربعين",
           "body_type": "Hatchback",
           "brand": "Mitsubishi",
           "city": "Jeddah",
           "condition": "NEW",
-          "description": "Mitsubishi Mirage 2022",
+          "description": "Mitsubishi Mirage ألفين واثنين وعشرين",
           "features": "",
           "model": "Mirage",
           "price_basis": "monthly",
           "product": "MONTHLY",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the monthly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2022
+          "year_spoken": "ألفين واثنين وعشرين"
         },
         {
           "area": "Al Baghdadiyah",
           "available_colors": [
             "Silver"
           ],
-          "base_price": 1770,
+          "base_price_spoken": "ألف وسبعمية وسبعين",
           "body_type": "Hatchback",
           "brand": "Mitsubishi",
           "city": "Jeddah",
           "condition": "NEW",
-          "description": "Mitsubishi Mirage 2022",
+          "description": "Mitsubishi Mirage ألفين واثنين وعشرين",
           "features": "",
           "model": "Mirage",
           "price_basis": "monthly",
           "product": "MONTHLY",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the monthly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2022
+          "year_spoken": "ألفين واثنين وعشرين"
         },
         {
           "area": "Heraa",
           "available_colors": [
             "Beige"
           ],
-          "base_price": 1770,
+          "base_price_spoken": "ألف وسبعمية وسبعين",
           "body_type": "Sedan",
           "brand": "Kia",
           "city": "Jeddah",
           "condition": "NEW",
-          "description": "Kia Pegas 2023",
+          "description": "Kia Pegas ألفين وثلاثة وعشرين",
           "features": "",
           "model": "Pegas",
           "price_basis": "monthly",
           "product": "MONTHLY",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the monthly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2023
+          "year_spoken": "ألفين وثلاثة وعشرين"
         },
         {
           "area": "Ar Rawdah",
           "available_colors": [
             "Grey"
           ],
-          "base_price": 1779,
+          "base_price_spoken": "ألف وسبعمية وتسعة وسبعين",
           "body_type": "Sedan",
           "brand": "Kia",
           "city": "Jeddah",
           "condition": "NEW",
-          "description": "Kia Pegas 2024",
+          "description": "Kia Pegas ألفين وأربعة وعشرين",
           "features": "",
           "model": "Pegas",
           "price_basis": "monthly",
           "product": "MONTHLY",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the monthly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2024
+          "year_spoken": "ألفين وأربعة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Ideal Match Found"
     },
-    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Mitsubishi Mirage 2022\",\"brand\":\"Mitsubishi\",\"model\":\"Mirage\",\"year\":2022,\"condition\":\"NEW\",\"body_type\":\"Hatchback\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"base_price\":1749,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Al Itisalat\",\"city\":\"Jeddah\",\"available_colors\":[\"Silver\"],\"features\":\"\"},{\"description\":\"Mitsubishi Mirage 2022\",\"brand\":\"Mitsubishi\",\"model\":\"Mirage\",\"year\":2022,\"condition\":\"NEW\",\"body_type\":\"Hatchback\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"base_price\":1770,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Al Baghdadiyah\",\"city\":\"Jeddah\",\"available_colors\":[\"Silver\"],\"features\":\"\"},{\"description\":\"Kia Pegas 2023\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2023,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"base_price\":1770,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Heraa\",\"city\":\"Jeddah\",\"available_colors\":[\"Beige\"],\"features\":\"\"},{\"description\":\"Kia Pegas 2024\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2024,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"base_price\":1779,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Ar Rawdah\",\"city\":\"Jeddah\",\"available_colors\":[\"Grey\"],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ألف وسبعمية وتسعة وأربعين\",\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Mitsubishi Mirage ألفين واثنين وعشرين\",\"brand\":\"Mitsubishi\",\"model\":\"Mirage\",\"condition\":\"NEW\",\"body_type\":\"Hatchback\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Al Itisalat\",\"city\":\"Jeddah\",\"available_colors\":[\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين واثنين وعشرين\",\"base_price_spoken\":\"ألف وسبعمية وتسعة وأربعين\"},{\"description\":\"Mitsubishi Mirage ألفين واثنين وعشرين\",\"brand\":\"Mitsubishi\",\"model\":\"Mirage\",\"condition\":\"NEW\",\"body_type\":\"Hatchback\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Al Baghdadiyah\",\"city\":\"Jeddah\",\"available_colors\":[\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين واثنين وعشرين\",\"base_price_spoken\":\"ألف وسبعمية وسبعين\"},{\"description\":\"Kia Pegas ألفين وثلاثة وعشرين\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Heraa\",\"city\":\"Jeddah\",\"available_colors\":[\"Beige\"],\"features\":\"\",\"year_spoken\":\"ألفين وثلاثة وعشرين\",\"base_price_spoken\":\"ألف وسبعمية وسبعين\"},{\"description\":\"Kia Pegas ألفين وأربعة وعشرين\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Ar Rawdah\",\"city\":\"Jeddah\",\"available_colors\":[\"Grey\"],\"features\":\"\",\"year_spoken\":\"ألفين وأربعة وعشرين\",\"base_price_spoken\":\"ألف وسبعمية وتسعة وسبعين\"}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Ideal Match Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -1213,92 +1362,103 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "ألف وسبعمية وسبعين",
       "message": "I have what you're looking for.",
       "results": [
         {
-          "area": "Al-Madinah Al-Munawarah",
+          "area": "Heraa",
           "available_colors": [
-            "Silver"
+            "Beige"
           ],
-          "base_price": 2499,
+          "base_price_spoken": "ألف وسبعمية وسبعين",
           "body_type": "Sedan",
-          "brand": "Hyundai",
+          "brand": "Kia",
           "city": "Jeddah",
           "condition": "NEW",
-          "description": "Hyundai Accent 2025",
+          "description": "Kia Pegas ألفين وثلاثة وعشرين",
           "features": "",
-          "model": "Accent",
+          "model": "Pegas",
           "price_basis": "monthly",
           "product": "MONTHLY",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the monthly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2025
-        },
-        {
-          "area": "Palestine",
-          "available_colors": [
-            "White"
-          ],
-          "base_price": 2489,
-          "body_type": "Sedan",
-          "brand": "Hyundai",
-          "city": "Jeddah",
-          "condition": "NEW",
-          "description": "Hyundai Accent 2025",
-          "features": "",
-          "model": "Accent",
-          "price_basis": "monthly",
-          "product": "MONTHLY",
-          "starter_fee": 0,
-          "starter_fee_note": "A one-time starter fee of 10% of the monthly amount applies.",
-          "tier": "Entry level Sedan",
-          "year": 2025
+          "year_spoken": "ألفين وثلاثة وعشرين"
         },
         {
           "area": "Ar Rawdah",
           "available_colors": [
             "Grey"
           ],
-          "base_price": 2479,
+          "base_price_spoken": "ألف وسبعمية وتسعة وسبعين",
           "body_type": "Sedan",
-          "brand": "Toyota",
+          "brand": "Kia",
           "city": "Jeddah",
           "condition": "NEW",
-          "description": "Toyota Yaris 2023",
+          "description": "Kia Pegas ألفين وأربعة وعشرين",
           "features": "",
-          "model": "Yaris",
+          "model": "Pegas",
           "price_basis": "monthly",
           "product": "MONTHLY",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the monthly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2023
+          "year_spoken": "ألفين وأربعة وعشرين"
         },
         {
-          "area": "Al Itisalat",
+          "area": "Salamah",
           "available_colors": [
             "White"
           ],
-          "base_price": 2460,
+          "base_price_spoken": "ألف وسبعمية وتسعة وسبعين",
           "body_type": "Sedan",
-          "brand": "Toyota",
+          "brand": "Hyundai",
           "city": "Jeddah",
-          "condition": "NEW",
-          "description": "Toyota Yaris 2026",
+          "condition": "USED",
+          "description": "Hyundai i10 ألفين وثلاثة وعشرين",
           "features": "",
-          "model": "Yaris",
+          "model": "i10",
           "price_basis": "monthly",
           "product": "MONTHLY",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the monthly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وثلاثة وعشرين"
+        },
+        {
+          "area": "Bani Malik",
+          "available_colors": [
+            "Brown",
+            "Red",
+            "Silver",
+            "Blue"
+          ],
+          "base_price_spoken": "ألف وسبعمية وتسعة وثمانين",
+          "body_type": "Sedan",
+          "brand": "Suzuki",
+          "city": "Jeddah",
+          "condition": "NEW",
+          "description": "Suzuki Dzire ألفين واثنين وعشرين",
+          "features": "",
+          "model": "Dzire",
+          "price_basis": "monthly",
+          "product": "MONTHLY",
+          "starter_fee_note": "A one-time starter fee of 10% of the monthly amount applies.",
+          "tier": "Entry level Sedan",
+          "year_spoken": "ألفين واثنين وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Ideal Match Found"
     },
-    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Hyundai Accent 2025\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"year\":2025,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"base_price\":2499,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Al-Madinah Al-Munawarah\",\"city\":\"Jeddah\",\"available_colors\":[\"Silver\"],\"features\":\"\"},{\"description\":\"Hyundai Accent 2025\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"year\":2025,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"base_price\":2489,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Palestine\",\"city\":\"Jeddah\",\"available_colors\":[\"White\"],\"features\":\"\"},{\"description\":\"Toyota Yaris 2023\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"year\":2023,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"base_price\":2479,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Ar Rawdah\",\"city\":\"Jeddah\",\"available_colors\":[\"Grey\"],\"features\":\"\"},{\"description\":\"Toyota Yaris 2026\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"base_price\":2460,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Al Itisalat\",\"city\":\"Jeddah\",\"available_colors\":[\"White\"],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ألف وسبعمية وسبعين\",\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Kia Pegas ألفين وثلاثة وعشرين\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Heraa\",\"city\":\"Jeddah\",\"available_colors\":[\"Beige\"],\"features\":\"\",\"year_spoken\":\"ألفين وثلاثة وعشرين\",\"base_price_spoken\":\"ألف وسبعمية وسبعين\"},{\"description\":\"Kia Pegas ألفين وأربعة وعشرين\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Ar Rawdah\",\"city\":\"Jeddah\",\"available_colors\":[\"Grey\"],\"features\":\"\",\"year_spoken\":\"ألفين وأربعة وعشرين\",\"base_price_spoken\":\"ألف وسبعمية وتسعة وسبعين\"},{\"description\":\"Hyundai i10 ألفين وثلاثة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"i10\",\"condition\":\"USED\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Salamah\",\"city\":\"Jeddah\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وثلاثة وعشرين\",\"base_price_spoken\":\"ألف وسبعمية وتسعة وسبعين\"},{\"description\":\"Suzuki Dzire ألفين واثنين وعشرين\",\"brand\":\"Suzuki\",\"model\":\"Dzire\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Bani Malik\",\"city\":\"Jeddah\",\"available_colors\":[\"Brown\",\"Red\",\"Silver\",\"Blue\"],\"features\":\"\",\"year_spoken\":\"ألفين واثنين وعشرين\",\"base_price_spoken\":\"ألف وسبعمية وتسعة وثمانين\"}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Ideal Match Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -1310,6 +1470,7 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "خمسمية وسبعين",
       "message": "I have what you're looking for.",
       "results": [
         {
@@ -1317,60 +1478,57 @@
           "available_colors": [
             "Golden"
           ],
-          "base_price": 570,
+          "base_price_spoken": "خمسمية وسبعين",
           "body_type": "Sedan",
           "brand": "Suzuki",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Suzuki Dzire 2023",
+          "description": "Suzuki Dzire ألفين وثلاثة وعشرين",
           "features": "",
           "model": "Dzire",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2023
+          "year_spoken": "ألفين وثلاثة وعشرين"
         },
         {
           "area": "Sulimaniyah",
           "available_colors": [
             "White"
           ],
-          "base_price": 590,
+          "base_price_spoken": "خمسمية وتسعين",
           "body_type": "Sedan",
           "brand": "Changan",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Changan Alsvin 2024",
+          "description": "Changan Alsvin ألفين وأربعة وعشرين",
           "features": "",
           "model": "Alsvin",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2024
+          "year_spoken": "ألفين وأربعة وعشرين"
         },
         {
           "area": "Al Munsiyah",
           "available_colors": [
             "Grey"
           ],
-          "base_price": 590,
+          "base_price_spoken": "خمسمية وتسعين",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Hyundai Grand i10 2025",
+          "description": "Hyundai Grand i10 ألفين وخمسة وعشرين",
           "features": "",
           "model": "Grand i10",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2025
+          "year_spoken": "ألفين وخمسة وعشرين"
         },
         {
           "area": "An Nahdah",
@@ -1378,25 +1536,35 @@
             "White",
             "Silver"
           ],
-          "base_price": 600,
+          "base_price_spoken": "ستمية",
           "body_type": "Sedan",
           "brand": "Nissan",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Nissan Sunny 2024",
+          "description": "Nissan Sunny ألفين وأربعة وعشرين",
           "features": "",
           "model": "Sunny",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2024
+          "year_spoken": "ألفين وأربعة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Ideal Match Found"
     },
-    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Suzuki Dzire 2023\",\"brand\":\"Suzuki\",\"model\":\"Dzire\",\"year\":2023,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":570,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"- Al-Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Golden\"],\"features\":\"\"},{\"description\":\"Changan Alsvin 2024\",\"brand\":\"Changan\",\"model\":\"Alsvin\",\"year\":2024,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":590,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Sulimaniyah\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\"},{\"description\":\"Hyundai Grand i10 2025\",\"brand\":\"Hyundai\",\"model\":\"Grand i10\",\"year\":2025,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":590,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Munsiyah\",\"city\":\"Riyadh\",\"available_colors\":[\"Grey\"],\"features\":\"\"},{\"description\":\"Nissan Sunny 2024\",\"brand\":\"Nissan\",\"model\":\"Sunny\",\"year\":2024,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":600,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"White\",\"Silver\"],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"خمسمية وسبعين\",\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Suzuki Dzire ألفين وثلاثة وعشرين\",\"brand\":\"Suzuki\",\"model\":\"Dzire\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"- Al-Quds\",\"city\":\"Riyadh\",\"available_colors\":[\"Golden\"],\"features\":\"\",\"year_spoken\":\"ألفين وثلاثة وعشرين\",\"base_price_spoken\":\"خمسمية وسبعين\"},{\"description\":\"Changan Alsvin ألفين وأربعة وعشرين\",\"brand\":\"Changan\",\"model\":\"Alsvin\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Sulimaniyah\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وأربعة وعشرين\",\"base_price_spoken\":\"خمسمية وتسعين\"},{\"description\":\"Hyundai Grand i10 ألفين وخمسة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Grand i10\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Munsiyah\",\"city\":\"Riyadh\",\"available_colors\":[\"Grey\"],\"features\":\"\",\"year_spoken\":\"ألفين وخمسة وعشرين\",\"base_price_spoken\":\"خمسمية وتسعين\"},{\"description\":\"Nissan Sunny ألفين وأربعة وعشرين\",\"brand\":\"Nissan\",\"model\":\"Sunny\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"An Nahdah\",\"city\":\"Riyadh\",\"available_colors\":[\"White\",\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين وأربعة وعشرين\",\"base_price_spoken\":\"ستمية\"}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Ideal Match Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -1409,6 +1577,7 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "سبعمية وتسعين",
       "message": "I have what you're looking for.",
       "results": [
         {
@@ -1416,20 +1585,19 @@
           "available_colors": [
             "Blue"
           ],
-          "base_price": 790,
+          "base_price_spoken": "سبعمية وتسعين",
           "body_type": "SUV",
           "brand": "Toyota",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Toyota Raize 2023",
+          "description": "Toyota Raize ألفين وثلاثة وعشرين",
           "features": "",
           "model": "Raize",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level SUV",
-          "year": 2023
+          "year_spoken": "ألفين وثلاثة وعشرين"
         },
         {
           "area": "Al Qirawan",
@@ -1437,65 +1605,73 @@
             "Black",
             "Silver"
           ],
-          "base_price": 860,
+          "base_price_spoken": "ثمنمية وستين",
           "body_type": "SUV",
           "brand": "MG",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "MG RX5 2022",
+          "description": "MG RX5 ألفين واثنين وعشرين",
           "features": "",
           "model": "RX5",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Midsize SUV",
-          "year": 2022
+          "year_spoken": "ألفين واثنين وعشرين"
         },
         {
           "area": "Sulimaniyah",
           "available_colors": [
             "White"
           ],
-          "base_price": 960,
+          "base_price_spoken": "تسعمية وستين",
           "body_type": "SUV",
           "brand": "Kia",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Kia Seltos 2022",
+          "description": "Kia Seltos ألفين واثنين وعشرين",
           "features": "",
           "model": "Seltos",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level SUV",
-          "year": 2022
+          "year_spoken": "ألفين واثنين وعشرين"
         },
         {
           "area": "As Sahabah",
           "available_colors": [
             "White"
           ],
-          "base_price": 980,
+          "base_price_spoken": "تسعمية وثمانين",
           "body_type": "SUV",
           "brand": "Toyota",
           "city": "Riyadh",
           "condition": "NEW",
-          "description": "Toyota Raize 2026",
+          "description": "Toyota Raize ألفين وستة وعشرين",
           "features": "",
           "model": "Raize",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level SUV",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Ideal Match Found"
     },
-    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Toyota Raize 2023\",\"brand\":\"Toyota\",\"model\":\"Raize\",\"year\":2023,\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":790,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Urubah\",\"city\":\"Riyadh\",\"available_colors\":[\"Blue\"],\"features\":\"\"},{\"description\":\"MG RX5 2022\",\"brand\":\"MG\",\"model\":\"RX5\",\"year\":2022,\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Midsize SUV\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":860,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Qirawan\",\"city\":\"Riyadh\",\"available_colors\":[\"Black\",\"Silver\"],\"features\":\"\"},{\"description\":\"Kia Seltos 2022\",\"brand\":\"Kia\",\"model\":\"Seltos\",\"year\":2022,\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":960,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Sulimaniyah\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\"},{\"description\":\"Toyota Raize 2026\",\"brand\":\"Toyota\",\"model\":\"Raize\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":980,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"As Sahabah\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"سبعمية وتسعين\",\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Toyota Raize ألفين وثلاثة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Raize\",\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Urubah\",\"city\":\"Riyadh\",\"available_colors\":[\"Blue\"],\"features\":\"\",\"year_spoken\":\"ألفين وثلاثة وعشرين\",\"base_price_spoken\":\"سبعمية وتسعين\"},{\"description\":\"MG RX5 ألفين واثنين وعشرين\",\"brand\":\"MG\",\"model\":\"RX5\",\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Midsize SUV\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Qirawan\",\"city\":\"Riyadh\",\"available_colors\":[\"Black\",\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين واثنين وعشرين\",\"base_price_spoken\":\"ثمنمية وستين\"},{\"description\":\"Kia Seltos ألفين واثنين وعشرين\",\"brand\":\"Kia\",\"model\":\"Seltos\",\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Sulimaniyah\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين واثنين وعشرين\",\"base_price_spoken\":\"تسعمية وستين\"},{\"description\":\"Toyota Raize ألفين وستة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Raize\",\"condition\":\"NEW\",\"body_type\":\"SUV\",\"tier\":\"Entry level SUV\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"As Sahabah\",\"city\":\"Riyadh\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"تسعمية وثمانين\"}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Ideal Match Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -1506,6 +1682,7 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "ستمية وثمانين",
       "message": "I have what you're looking for.",
       "results": [
         {
@@ -1513,40 +1690,38 @@
           "available_colors": [
             "Silver"
           ],
-          "base_price": 680,
+          "base_price_spoken": "ستمية وثمانين",
           "body_type": "Sedan",
           "brand": "Kia",
           "city": "Dammam",
           "condition": "NEW",
-          "description": "Kia Pegas 2026",
+          "description": "Kia Pegas ألفين وستة وعشرين",
           "features": "",
           "model": "Pegas",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "Tuwaiq",
           "available_colors": [
             "White"
           ],
-          "base_price": 910,
+          "base_price_spoken": "تسعمية وعشرة",
           "body_type": "Sedan",
           "brand": "Kia",
           "city": "Dammam",
           "condition": "NEW",
-          "description": "Kia Pegas 2026",
+          "description": "Kia Pegas ألفين وستة وعشرين",
           "features": "",
           "model": "Pegas",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2026
+          "year_spoken": "ألفين وستة وعشرين"
         },
         {
           "area": "Al Itisalat",
@@ -1555,20 +1730,19 @@
             "Black",
             "Red"
           ],
-          "base_price": 929,
+          "base_price_spoken": "تسعمية وتسعة وعشرين",
           "body_type": "Sedan",
           "brand": "Nissan",
           "city": "Dammam",
           "condition": "NEW",
-          "description": "Nissan Sunny 2023",
+          "description": "Nissan Sunny ألفين وثلاثة وعشرين",
           "features": "",
           "model": "Sunny",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2023
+          "year_spoken": "ألفين وثلاثة وعشرين"
         },
         {
           "area": "Al Itisalat",
@@ -1576,25 +1750,35 @@
             "Silver",
             "Beige"
           ],
-          "base_price": 969,
+          "base_price_spoken": "تسعمية وتسعة وستين",
           "body_type": "Sedan",
           "brand": "Kia",
           "city": "Dammam",
           "condition": "NEW",
-          "description": "Kia Pegas 2023",
+          "description": "Kia Pegas ألفين وثلاثة وعشرين",
           "features": "",
           "model": "Pegas",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2023
+          "year_spoken": "ألفين وثلاثة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Ideal Match Found"
     },
-    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Kia Pegas 2026\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":680,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Thawn\",\"city\":\"Dammam\",\"available_colors\":[\"Silver\"],\"features\":\"\"},{\"description\":\"Kia Pegas 2026\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2026,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":910,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Tuwaiq\",\"city\":\"Dammam\",\"available_colors\":[\"White\"],\"features\":\"\"},{\"description\":\"Nissan Sunny 2023\",\"brand\":\"Nissan\",\"model\":\"Sunny\",\"year\":2023,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":929,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Itisalat\",\"city\":\"Dammam\",\"available_colors\":[\"Silver\",\"Black\",\"Red\"],\"features\":\"\"},{\"description\":\"Kia Pegas 2023\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2023,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":969,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Itisalat\",\"city\":\"Dammam\",\"available_colors\":[\"Silver\",\"Beige\"],\"features\":\"\"}],\"status\":\"Ideal Match Found\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"ستمية وثمانين\",\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Kia Pegas ألفين وستة وعشرين\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Thawn\",\"city\":\"Dammam\",\"available_colors\":[\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"ستمية وثمانين\"},{\"description\":\"Kia Pegas ألفين وستة وعشرين\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Tuwaiq\",\"city\":\"Dammam\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وستة وعشرين\",\"base_price_spoken\":\"تسعمية وعشرة\"},{\"description\":\"Nissan Sunny ألفين وثلاثة وعشرين\",\"brand\":\"Nissan\",\"model\":\"Sunny\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Itisalat\",\"city\":\"Dammam\",\"available_colors\":[\"Silver\",\"Black\",\"Red\"],\"features\":\"\",\"year_spoken\":\"ألفين وثلاثة وعشرين\",\"base_price_spoken\":\"تسعمية وتسعة وعشرين\"},{\"description\":\"Kia Pegas ألفين وثلاثة وعشرين\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Itisalat\",\"city\":\"Dammam\",\"available_colors\":[\"Silver\",\"Beige\"],\"features\":\"\",\"year_spoken\":\"ألفين وثلاثة وعشرين\",\"base_price_spoken\":\"تسعمية وتسعة وستين\"}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Ideal Match Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -1605,6 +1789,7 @@
     "api_key_provided": true,
     "status_code": 200,
     "body": {
+      "cheapest_spoken": "سبعمية وتسعين",
       "message": "I have what you're looking for.",
       "results": [
         {
@@ -1612,85 +1797,92 @@
           "available_colors": [
             "White"
           ],
-          "base_price": 790,
+          "base_price_spoken": "سبعمية وتسعين",
           "body_type": "Sedan",
           "brand": "Toyota",
           "city": "Madinah",
           "condition": "NEW",
-          "description": "Toyota Yaris 2024",
+          "description": "Toyota Yaris ألفين وأربعة وعشرين",
           "features": "",
           "model": "Yaris",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2024
+          "year_spoken": "ألفين وأربعة وعشرين"
         },
         {
           "area": "Al Iskan",
           "available_colors": [
             "White"
           ],
-          "base_price": 1079,
+          "base_price_spoken": "ألف وتسعة وسبعين",
           "body_type": "Sedan",
           "brand": "Kia",
           "city": "Madinah",
           "condition": "NEW",
-          "description": "Kia Pegas 2024",
+          "description": "Kia Pegas ألفين وأربعة وعشرين",
           "features": "",
           "model": "Pegas",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2024
+          "year_spoken": "ألفين وأربعة وعشرين"
         },
         {
           "area": "Al Iskan",
           "available_colors": [
             "Silver"
           ],
-          "base_price": 1179,
+          "base_price_spoken": "ألف ومية وتسعة وسبعين",
           "body_type": "Sedan",
           "brand": "Nissan",
           "city": "Madinah",
           "condition": "NEW",
-          "description": "Nissan Sunny 2024",
+          "description": "Nissan Sunny ألفين وأربعة وعشرين",
           "features": "",
           "model": "Sunny",
           "price_basis": "weekly",
           "product": "STS",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the weekly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2024
+          "year_spoken": "ألفين وأربعة وعشرين"
         },
         {
           "area": "Khalid Ibn Al Walid",
           "available_colors": [
             "Silver"
           ],
-          "base_price": 1999,
+          "base_price_spoken": "ألف وتسعمية وتسعة وتسعين",
           "body_type": "Sedan",
           "brand": "Hyundai",
           "city": "Madinah",
           "condition": "NEW",
-          "description": "Hyundai Accent 2023",
+          "description": "Hyundai Accent ألفين وثلاثة وعشرين",
           "features": "High Spec",
           "model": "Accent",
           "price_basis": "monthly",
           "product": "MONTHLY",
-          "starter_fee": 0,
           "starter_fee_note": "A one-time starter fee of 10% of the monthly amount applies.",
           "tier": "Entry level Sedan",
-          "year": 2023
+          "year_spoken": "ألفين وثلاثة وعشرين"
         }
+      ],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
       ],
       "status": "Ideal Match Found"
     },
-    "raw_body": "{\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Toyota Yaris 2024\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"year\":2024,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":790,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Airport\",\"city\":\"Madinah\",\"available_colors\":[\"White\"],\"features\":\"\"},{\"description\":\"Kia Pegas 2024\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"year\":2024,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":1079,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Iskan\",\"city\":\"Madinah\",\"available_colors\":[\"White\"],\"features\":\"\"},{\"description\":\"Nissan Sunny 2024\",\"brand\":\"Nissan\",\"model\":\"Sunny\",\"year\":2024,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"base_price\":1179,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Iskan\",\"city\":\"Madinah\",\"available_colors\":[\"Silver\"],\"features\":\"\"},{\"description\":\"Hyundai Accent 2023\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"year\":2023,\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"base_price\":1999,\"starter_fee\":0,\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Khalid Ibn Al Walid\",\"city\":\"Madinah\",\"available_colors\":[\"Silver\"],\"features\":\"High Spec\"}],\"status\":\"Ideal Match Found\"}\n",
+    "raw_body": "{\"cheapest_spoken\":\"سبعمية وتسعين\",\"message\":\"I have what you're looking for.\",\"results\":[{\"description\":\"Toyota Yaris ألفين وأربعة وعشرين\",\"brand\":\"Toyota\",\"model\":\"Yaris\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Airport\",\"city\":\"Madinah\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وأربعة وعشرين\",\"base_price_spoken\":\"سبعمية وتسعين\"},{\"description\":\"Kia Pegas ألفين وأربعة وعشرين\",\"brand\":\"Kia\",\"model\":\"Pegas\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Iskan\",\"city\":\"Madinah\",\"available_colors\":[\"White\"],\"features\":\"\",\"year_spoken\":\"ألفين وأربعة وعشرين\",\"base_price_spoken\":\"ألف وتسعة وسبعين\"},{\"description\":\"Nissan Sunny ألفين وأربعة وعشرين\",\"brand\":\"Nissan\",\"model\":\"Sunny\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"STS\",\"price_basis\":\"weekly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the weekly amount applies.\",\"area\":\"Al Iskan\",\"city\":\"Madinah\",\"available_colors\":[\"Silver\"],\"features\":\"\",\"year_spoken\":\"ألفين وأربعة وعشرين\",\"base_price_spoken\":\"ألف ومية وتسعة وسبعين\"},{\"description\":\"Hyundai Accent ألفين وثلاثة وعشرين\",\"brand\":\"Hyundai\",\"model\":\"Accent\",\"condition\":\"NEW\",\"body_type\":\"Sedan\",\"tier\":\"Entry level Sedan\",\"product\":\"MONTHLY\",\"price_basis\":\"monthly\",\"starter_fee_note\":\"A one-time starter fee of 10% of the monthly amount applies.\",\"area\":\"Khalid Ibn Al Walid\",\"city\":\"Madinah\",\"available_colors\":[\"Silver\"],\"features\":\"High Spec\",\"year_spoken\":\"ألفين وثلاثة وعشرين\",\"base_price_spoken\":\"ألف وتسعمية وتسعة وتسعين\"}],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"Ideal Match Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   },
   {
@@ -1714,9 +1906,20 @@
       ],
       "message": "We currently have no cars available in Atlantis. I do have them in Al Khobar, Arar, Dammam.",
       "results": [],
+      "service_cities": [
+        "Al Khobar",
+        "Arar",
+        "Dammam",
+        "Jeddah",
+        "Madinah",
+        "Mecca",
+        "Riyadh",
+        "Taif",
+        "Turayf"
+      ],
       "status": "No Cars Found"
     },
-    "raw_body": "{\"also_in_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"message\":\"We currently have no cars available in Atlantis. I do have them in Al Khobar, Arar, Dammam.\",\"results\":[],\"status\":\"No Cars Found\"}\n",
+    "raw_body": "{\"also_in_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"message\":\"We currently have no cars available in Atlantis. I do have them in Al Khobar, Arar, Dammam.\",\"results\":[],\"service_cities\":[\"Al Khobar\",\"Arar\",\"Dammam\",\"Jeddah\",\"Madinah\",\"Mecca\",\"Riyadh\",\"Taif\",\"Turayf\"],\"status\":\"No Cars Found\"}\n",
     "recorded_at": "0001-01-01T00:00:00Z"
   }
 ]

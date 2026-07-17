@@ -10,6 +10,7 @@ import (
 // invariantProblems checks every cross-cutting guarantee that must hold for ANY
 // response, given the request fields. Returns a list of violations (empty = OK).
 func invariantProblems(reqProduct, city, cond, body string, budget float64, resp map[string]interface{}) []string {
+	ensureSpokenMap()
 	var p []string
 	add := func(f string, a ...interface{}) { p = append(p, fmt.Sprintf(f, a...)) }
 
@@ -28,7 +29,14 @@ func invariantProblems(reqProduct, city, cond, body string, budget float64, resp
 	for _, ri := range rs {
 		c, _ := ri.(map[string]interface{})
 		cl := func(k string) string { s, _ := c[k].(string); return s }
-		cf := func(k string) float64 { f, _ := c[k].(float64); return f }
+		// Raw digits are stripped by design; numeric invariants read the *_spoken
+		// forms and reverse-map them (see spoken_helpers_test.go).
+		for _, k := range []string{"base_price", "starter_fee", "year"} {
+			if _, present := c[k]; present {
+				add("raw digit field %q leaked on %q", k, cl("description"))
+			}
+		}
+		price, priced := spokenNum[cl("base_price_spoken")]
 
 		if !strings.EqualFold(cl("city"), strings.TrimSpace(city)) {
 			add("city leak %q!=%q", cl("city"), city)
@@ -36,8 +44,8 @@ func invariantProblems(reqProduct, city, cond, body string, budget float64, resp
 		if reqProduct != "" && !strings.EqualFold(cl("product"), reqProduct) {
 			add("product leak %q want %s", cl("product"), reqProduct)
 		}
-		if cf("base_price") <= 0 {
-			add("unpriced result %q", cl("description"))
+		if cl("base_price_spoken") == "" || !priced || price <= 0 {
+			add("unpriced result %q (base_price_spoken=%q)", cl("description"), cl("base_price_spoken"))
 		}
 		prod, basis := strings.ToUpper(cl("product")), cl("price_basis")
 		if prod == "STS" && basis != "weekly" {
@@ -55,8 +63,8 @@ func invariantProblems(reqProduct, city, cond, body string, budget float64, resp
 			if !strings.Contains(note, "10%") {
 				add("%s missing 10%% note", prod)
 			}
-			if cf("starter_fee") != 0 {
-				add("%s starter_fee!=0", prod)
+			if cl("starter_fee_spoken") != "" {
+				add("%s carries starter_fee_spoken %q (must be STO-only)", prod, cl("starter_fee_spoken"))
 			}
 		}
 		// Condition is honored on Ideal; in fallback it may be broadened (reported via relaxed_filters).
@@ -66,9 +74,10 @@ func invariantProblems(reqProduct, city, cond, body string, budget float64, resp
 		if body != "" && !strings.EqualFold(cl("body_type"), body) {
 			add("body leak %q!=%q (status=%s)", cl("body_type"), body, status)
 		}
-		// Budget cap only applies to monthly-priced plans on positive-match statuses.
-		if prod != "STS" && budget > 0 && (status == StatusIdeal || status == StatusAlternative) && cf("base_price") > bandCeiling(budget) {
-			add("budget cap %.0f>ceiling %.0f (status=%s)", cf("base_price"), bandCeiling(budget), status)
+		// Budget cap applies to ALL plans on positive-match statuses (STS included —
+		// a weekly budget is honored the same way since the STS max_price fix).
+		if budget > 0 && priced && (status == StatusIdeal || status == StatusAlternative) && price > bandCeiling(budget) {
+			add("budget cap %.0f>ceiling %.0f (status=%s)", price, bandCeiling(budget), status)
 		}
 	}
 	return p

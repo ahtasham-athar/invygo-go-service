@@ -50,19 +50,19 @@ func results(t *testing.T, resp map[string]interface{}) []map[string]interface{}
 
 func TestCleanArea(t *testing.T) {
 	cases := map[string]string{
-		"Riyadh - As Sulimaniyah - Pickup":        "As Sulimaniyah",
-		"Riyadh - Al Yarmuk":                       "Al Yarmuk",
-		"Riyadh - Al Faisaliyyah - STO - Pickup":   "Al Faisaliyyah",
-		"Jeddah - An Naseem (Pick-up)":             "An Naseem",
-		"Daily Sulimaniyah Riyadh":                 "Sulimaniyah",
-		"Daily Riyadh - Al Aqiq":                   "Al Aqiq",
-		"Jeddah Sakr Qoraish":                      "Sakr Qoraish",
-		"Al Khobar -  Al-Thuqbah":                  "Al-Thuqbah",
-		"Riyadh - An Nahdah (Pick - up )":          "An Nahdah",
-		"JDH":                                      "",
-		"ARAR":                                     "",
-		"Olayah":                                   "Olayah",
-		"":                                         "",
+		"Riyadh - As Sulimaniyah - Pickup":       "As Sulimaniyah",
+		"Riyadh - Al Yarmuk":                     "Al Yarmuk",
+		"Riyadh - Al Faisaliyyah - STO - Pickup": "Al Faisaliyyah",
+		"Jeddah - An Naseem (Pick-up)":           "An Naseem",
+		"Daily Sulimaniyah Riyadh":               "Sulimaniyah",
+		"Daily Riyadh - Al Aqiq":                 "Al Aqiq",
+		"Jeddah Sakr Qoraish":                    "Sakr Qoraish",
+		"Al Khobar -  Al-Thuqbah":                "Al-Thuqbah",
+		"Riyadh - An Nahdah (Pick - up )":        "An Nahdah",
+		"JDH":                                    "",
+		"ARAR":                                   "",
+		"Olayah":                                 "Olayah",
+		"":                                       "",
 	}
 	for in, want := range cases {
 		if got := cleanArea(in, ""); got != want {
@@ -188,11 +188,13 @@ func TestNoBudgetReturnsLadderedAlternative(t *testing.T) {
 	if resp["status"] != StatusAlternative {
 		t.Fatalf("expected %q, got %v", StatusAlternative, resp["status"])
 	}
-	if _, ok := resp["price_min"]; !ok {
-		t.Error("price_min missing")
+	// Raw digits are stripped by design; the range ships as Arabic spoken words.
+	assertNoRawDigits(t, resp, "no-budget ladder response")
+	if s, _ := resp["price_min_spoken"].(string); s == "" {
+		t.Error("price_min_spoken missing")
 	}
-	if _, ok := resp["price_max"]; !ok {
-		t.Error("price_max missing")
+	if s, _ := resp["price_max_spoken"].(string); s == "" {
+		t.Error("price_max_spoken missing")
 	}
 	if len(results(t, resp)) == 0 {
 		t.Error("expected a laddered spread, got no results")
@@ -217,8 +219,13 @@ func TestSTSWeeklyBasisAndNoStarterFee(t *testing.T) {
 	if c["price_basis"] != "weekly" {
 		t.Errorf("STS price_basis = %v, want weekly", c["price_basis"])
 	}
-	if c["starter_fee"].(float64) != 0 {
-		t.Errorf("STS starter_fee should be 0 (10%% rule), got %v", c["starter_fee"])
+	// starter_fee is STO-only and raw digits never serialize: an STS card must have
+	// neither the raw field nor a spoken form.
+	if _, present := c["starter_fee"]; present {
+		t.Errorf("raw starter_fee leaked on STS card: %v", c["starter_fee"])
+	}
+	if s, _ := c["starter_fee_spoken"].(string); s != "" {
+		t.Errorf("STS starter_fee_spoken should be absent (10%% rule), got %q", s)
 	}
 	if note, _ := c["starter_fee_note"].(string); !strings.Contains(note, "10%") {
 		t.Errorf("STS should carry 10%% starter_fee_note, got %q", note)
@@ -307,7 +314,7 @@ func TestNoBodyMatchCarriesBodyTypes(t *testing.T) {
 func TestMinPriceFloor(t *testing.T) {
 	_, resp := doRequest(t, `{"city":"Riyadh","product":"STO","min_price":2500}`, TEST_API_KEY)
 	for _, c := range results(t, resp) {
-		if p, _ := c["base_price"].(float64); p > 0 && p < 2500 {
+		if p, ok := spokenValue(t, c, "base_price_spoken"); ok && p < 2500 {
 			t.Errorf("min_price=2500 leaked %v", p)
 		}
 	}
@@ -317,7 +324,7 @@ func TestMinPriceFloor(t *testing.T) {
 func TestMinYearFilter(t *testing.T) {
 	_, resp := doRequest(t, `{"city":"Riyadh","product":"STO","min_year":2025}`, TEST_API_KEY)
 	for _, c := range results(t, resp) {
-		if y, _ := c["year"].(float64); y > 0 && int(y) < 2025 {
+		if y, ok := spokenValue(t, c, "year_spoken"); ok && int(y) < 2025 {
 			t.Errorf("min_year=2025 leaked %v", y)
 		}
 	}
@@ -348,7 +355,7 @@ func TestProportionalBand(t *testing.T) {
 	_, resp := doRequest(t, `{"city":"Riyadh","product":"STO","query":"Zzz","body_type":"Sedan","max_price":2500}`, TEST_API_KEY)
 	if resp["status"] == StatusAlternative {
 		for _, c := range results(t, resp) {
-			if p, _ := c["base_price"].(float64); p > 2750 {
+			if p, ok := spokenValue(t, c, "base_price_spoken"); ok && p > 2750 {
 				t.Errorf("Alternative leaked %v above ceiling 2750", p)
 			}
 		}
