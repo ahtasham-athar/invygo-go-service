@@ -1,0 +1,238 @@
+[
+  {
+    "active": true,
+    "function_name": "get_patient_details",
+    "description": "Look up a patient in the hospital ERP by phone number. Returns patient_id, full name, date of birth, last visit and medical history. Use this right after capturing the caller's phone number to recognize returning patients so you never re-ask for details already on file.",
+    "base_url": "http://host.docker.internal:8890",
+    "endpoint_path": "/patients?phone={phone_number}",
+    "http_method": "GET",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "phone_number": {
+          "type": "string",
+          "description": "The patient's phone number as digits (country code optional, e.g. 971501234567). Matching is tolerant of missing '+' or country code."
+        }
+      },
+      "required": ["phone_number"]
+    },
+    "response_mapping": {
+      "patients": "results"
+    }
+  },
+  {
+    "active": true,
+    "function_name": "yaqeen_verify",
+    "description": "Verify a NEW patient's identity against the national Yaqeen registry using their National ID / Iqama number and date of birth. Returns the verified full name, gender, nationality and DOB — use these to register the patient (pass national_id, dob, gender to book_appointment). If verified=false, fall back to fast registration (ask for the full name instead). Only for patients NOT found by get_patient_details.",
+    "base_url": "http://host.docker.internal:8890",
+    "endpoint_path": "/yaqeen",
+    "http_method": "GET",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "national_id": {
+          "type": "string",
+          "description": "The National ID or Iqama number, digits only (e.g. 1055667788)."
+        },
+        "dob": {
+          "type": "string",
+          "description": "The caller's date of birth, format YYYY-MM-DD. Used to confirm the identity match."
+        }
+      },
+      "required": ["national_id", "dob"]
+    }
+  },
+  {
+    "active": true,
+    "function_name": "get_departments",
+    "description": "List all live departments and the branch each one operates at (e.g. Eye Care at Dubai DHCC / Abu Dhabi / Al Ain / Mirdif, ENT Care at Abu Dhabi). Returns department_id values needed by get_doctors and check_availability. Call once per call when a booking starts and remember the ids.",
+    "base_url": "http://host.docker.internal:8890",
+    "endpoint_path": "/departments",
+    "http_method": "GET",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {}
+    },
+    "response_mapping": {
+      "departments": "results"
+    }
+  },
+  {
+    "active": true,
+    "function_name": "get_doctors",
+    "description": "Fetch the LIVE doctor roster from the hospital ERP, with each doctor's doctor_id, specialty, department and branch. This is the ONLY source of doctor names — never recite doctors from memory. Filter by department_id (preferred) or branch.",
+    "base_url": "http://host.docker.internal:8890",
+    "endpoint_path": "/doctors",
+    "http_method": "GET",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "department_id": {
+          "type": "integer",
+          "description": "Filter by department_id from get_departments (a department_id already implies one branch)."
+        },
+        "branch": {
+          "type": "string",
+          "description": "Optional branch filter: 'Dubai DHCC', 'Abu Dhabi', 'Al Ain' or 'Mirdif'."
+        }
+      }
+    },
+    "response_mapping": {
+      "doctors": "results"
+    }
+  },
+  {
+    "active": true,
+    "function_name": "check_availability",
+    "description": "Get the FREE 30-minute appointment slots for one date, either for a specific doctor (doctor_id) or for every doctor in a department (department_id). Each slot has an availability_id — that exact id is what book_appointment and reschedule_appointment need. Always call this before offering or confirming any time.",
+    "base_url": "http://host.docker.internal:8890",
+    "endpoint_path": "/availability",
+    "http_method": "GET",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "The date to check, format YYYY-MM-DD (e.g. 2026-07-22)."
+        },
+        "doctor_id": {
+          "type": "integer",
+          "description": "Check one specific doctor's slots (from get_doctors)."
+        },
+        "department_id": {
+          "type": "integer",
+          "description": "Check all doctors of one department/branch (from get_departments). Use when the caller has no doctor preference."
+        }
+      },
+      "required": ["date"]
+    },
+    "response_mapping": {
+      "date": "date",
+      "free_slots": "results"
+    }
+  },
+  {
+    "active": true,
+    "function_name": "book_appointment",
+    "description": "Book an appointment in the hospital ERP by reserving one free slot. Pass the availability_id of the slot the caller picked (from check_availability this call). For a returning patient pass their patient_id (from get_patient_details); for a new patient pass patient_name and phone instead and they are registered automatically. Returns appointment_id and the confirmed doctor/branch/time.",
+    "base_url": "http://host.docker.internal:8890",
+    "endpoint_path": "/appointments",
+    "http_method": "POST",
+    "request_template": {
+      "availability_id": "${availability_id}",
+      "patient_id": "${patient_id}",
+      "patient_name": "${patient_name}",
+      "phone": "${phone}",
+      "national_id": "${national_id}",
+      "dob": "${dob}",
+      "gender": "${gender}",
+      "reason": "${reason}"
+    },
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "availability_id": {
+          "type": "integer",
+          "description": "The availability_id of the chosen free slot, exactly as returned by check_availability in THIS call. Never invent it."
+        },
+        "patient_id": {
+          "type": "integer",
+          "description": "The patient's id from get_patient_details. Omit for a brand-new patient."
+        },
+        "patient_name": {
+          "type": "string",
+          "description": "The patient's full name. Required when patient_id is not passed (new patient). For a Yaqeen-verified patient, use the verified full_name."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The patient's phone number as digits (e.g. 971501234567). Required when patient_id is not passed."
+        },
+        "national_id": {
+          "type": "string",
+          "description": "New patients only: the National ID / Iqama number (from yaqeen_verify or as given by the caller)."
+        },
+        "dob": {
+          "type": "string",
+          "description": "New patients only: date of birth YYYY-MM-DD (from yaqeen_verify or the caller)."
+        },
+        "gender": {
+          "type": "string",
+          "description": "New patients only: gender, if known (from yaqeen_verify)."
+        },
+        "reason": {
+          "type": "string",
+          "description": "The medical reason for the visit, e.g. 'LASIK consultation' or 'hearing test'."
+        }
+      },
+      "required": ["availability_id", "reason"]
+    }
+  },
+  {
+    "active": true,
+    "function_name": "find_appointments",
+    "description": "Find a patient's SCHEDULED appointments by phone number. This is the ONLY source of an appointment_id for reschedule_appointment / cancel_appointment. Returns appointment_id, patient name, doctor, department, branch, date/time and reason for each match.",
+    "base_url": "http://host.docker.internal:8890",
+    "endpoint_path": "/appointments?phone={phone_number}",
+    "http_method": "GET",
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "phone_number": {
+          "type": "string",
+          "description": "The phone number the appointment is booked under, as digits (country code optional). Matching is tolerant of missing '+' or country code."
+        }
+      },
+      "required": ["phone_number"]
+    },
+    "response_mapping": {
+      "appointments": "results"
+    }
+  },
+  {
+    "active": true,
+    "function_name": "reschedule_appointment",
+    "description": "Atomically move an existing appointment to a new slot: reserves the new slot, frees the old one and updates the appointment in one transaction. Needs the real appointment_id from find_appointments THIS call, and the new slot's availability_id from check_availability THIS call. If it fails, the original appointment is unchanged.",
+    "base_url": "http://host.docker.internal:8890",
+    "endpoint_path": "/appointments/reschedule",
+    "http_method": "POST",
+    "request_template": {
+      "appointment_id": "${appointment_id}",
+      "new_availability_id": "${new_availability_id}"
+    },
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "integer",
+          "description": "The appointment_id exactly as returned by find_appointments in THIS call. Never guess or reuse."
+        },
+        "new_availability_id": {
+          "type": "integer",
+          "description": "The availability_id of the new free slot, from check_availability in THIS call."
+        }
+      },
+      "required": ["appointment_id", "new_availability_id"]
+    }
+  },
+  {
+    "active": true,
+    "function_name": "cancel_appointment",
+    "description": "Cancel an existing appointment (marks it CANCELLED and frees its slot). Needs the real appointment_id from find_appointments THIS call. Use only after the caller explicitly confirms the cancellation.",
+    "base_url": "http://host.docker.internal:8890",
+    "endpoint_path": "/appointments/cancel",
+    "http_method": "POST",
+    "request_template": {
+      "appointment_id": "${appointment_id}"
+    },
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "appointment_id": {
+          "type": "integer",
+          "description": "The appointment_id exactly as returned by find_appointments in THIS call. Never guess or build one."
+        }
+      },
+      "required": ["appointment_id"]
+    }
+  }
+]

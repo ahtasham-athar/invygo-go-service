@@ -1,0 +1,25 @@
+services:
+  oracle-db:
+    image: gvenzl/oracle-free:latest
+    container_name: hospital-oracle-db
+    restart: unless-stopped
+    ports:
+      - "1521:1521"
+    environment:
+      - ORACLE_PASSWORD=demo_password
+      - APP_USER=hospital_user
+      - APP_USER_PASSWORD=hospital_password
+      # Clinic timezone — doctor_availability slots are seeded relative to
+      # SYSDATE, so a UTC container would shift the whole 9AM-5PM grid.
+      - TZ=Asia/Dubai
+    volumes:
+      - ./init.sql:/container-entrypoint-initdb.d/init.sql
+      - oracle-data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  oracle-data:

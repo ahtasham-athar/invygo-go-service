@@ -1,0 +1,9 @@
+# Compiled binaries (23MB each — build them, don't commit them)
+hospital-demo-service
+hospital-demo-service.exe
+hospital-demo-service.exe~
+hospital-demo-service-linux-amd64
+
+# Runtime logs
+service.log
+*.log
