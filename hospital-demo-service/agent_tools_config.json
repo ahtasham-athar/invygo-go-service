@@ -1,9 +1,10 @@
 [
   {
-    "active": true,
+    "name": "Get Patient Details",
+    "description": "Looks up a patient in the hospital ERP by phone number (Magrabi demo).",
     "function_name": "get_patient_details",
-    "description": "Look up a patient in the hospital ERP by phone number. Returns patient_id, full name, date of birth, last visit and medical history. Use this right after capturing the caller's phone number to recognize returning patients so you never re-ask for details already on file.",
-    "base_url": "http://host.docker.internal:8890",
+    "function_description": "Look up a patient in the hospital ERP by phone number. Returns patient_id, full name, MRN, national ID, date of birth, last visit and medical history. Use this right after capturing the caller's phone number to recognize returning patients so you never re-ask for details already on file. An empty result means the caller is a new patient.",
+    "base_url": "https://go.convoi.ai/hospital-demo",
     "endpoint_path": "/patients?phone={phone_number}",
     "http_method": "GET",
     "parameter_schema": {
@@ -18,13 +19,15 @@
     },
     "response_mapping": {
       "patients": "results"
-    }
+    },
+    "active": true
   },
   {
-    "active": true,
+    "name": "Yaqeen Identity Verification",
+    "description": "Verifies a new patient's National ID / Iqama against the national registry (Magrabi demo, mocked).",
     "function_name": "yaqeen_verify",
-    "description": "Verify a NEW patient's identity against the national Yaqeen registry using their National ID / Iqama number and date of birth. Returns the verified full name, gender, nationality and DOB — use these to register the patient (pass national_id, dob, gender to book_appointment). If verified=false, fall back to fast registration (ask for the full name instead). Only for patients NOT found by get_patient_details.",
-    "base_url": "http://host.docker.internal:8890",
+    "function_description": "Verify a NEW patient's identity against the national Yaqeen registry using their National ID / Iqama number and date of birth. Returns the verified full name, gender, nationality and DOB — use these to register the patient (pass national_id, dob and gender to book_appointment). If verified is false, fall back to fast registration and ask for the full name instead. Only use this for patients NOT found by get_patient_details.",
+    "base_url": "https://go.convoi.ai/hospital-demo",
     "endpoint_path": "/yaqeen",
     "http_method": "GET",
     "parameter_schema": {
@@ -40,13 +43,15 @@
         }
       },
       "required": ["national_id", "dob"]
-    }
+    },
+    "active": true
   },
   {
-    "active": true,
+    "name": "Get Departments",
+    "description": "Lists the live departments and their branches (Magrabi demo).",
     "function_name": "get_departments",
-    "description": "List all live departments and the branch each one operates at (e.g. Eye Care at Dubai DHCC / Abu Dhabi / Al Ain / Mirdif, ENT Care at Abu Dhabi). Returns department_id values needed by get_doctors and check_availability. Call once per call when a booking starts and remember the ids.",
-    "base_url": "http://host.docker.internal:8890",
+    "function_description": "List all live departments and the branch each one operates at (Eye Care at Dubai DHCC, Abu Dhabi, Al Ain and Mirdif; ENT Care at Abu Dhabi only). Returns the department_id values needed by get_doctors and check_availability. Call this once when a booking starts and remember the ids for the rest of the call.",
+    "base_url": "https://go.convoi.ai/hospital-demo",
     "endpoint_path": "/departments",
     "http_method": "GET",
     "parameter_schema": {
@@ -55,13 +60,15 @@
     },
     "response_mapping": {
       "departments": "results"
-    }
+    },
+    "active": true
   },
   {
-    "active": true,
+    "name": "Get Doctors",
+    "description": "Fetches the live doctor roster with specialty, department and branch (Magrabi demo).",
     "function_name": "get_doctors",
-    "description": "Fetch the LIVE doctor roster from the hospital ERP, with each doctor's doctor_id, specialty, department and branch. This is the ONLY source of doctor names — never recite doctors from memory. Filter by department_id (preferred) or branch.",
-    "base_url": "http://host.docker.internal:8890",
+    "function_description": "Fetch the LIVE doctor roster from the hospital ERP, with each doctor's doctor_id, specialty, department and branch. This is the ONLY source of doctor names — never recite doctors from memory. Filter by department_id (preferred) or branch. Name at most two or three relevant doctors to the caller, never the full list.",
+    "base_url": "https://go.convoi.ai/hospital-demo",
     "endpoint_path": "/doctors",
     "http_method": "GET",
     "parameter_schema": {
@@ -79,13 +86,15 @@
     },
     "response_mapping": {
       "doctors": "results"
-    }
+    },
+    "active": true
   },
   {
-    "active": true,
+    "name": "Check Availability",
+    "description": "Returns the free 30-minute appointment slots for a date (Magrabi demo).",
     "function_name": "check_availability",
-    "description": "Get the FREE 30-minute appointment slots for one date, either for a specific doctor (doctor_id) or for every doctor in a department (department_id). Each slot has an availability_id — that exact id is what book_appointment and reschedule_appointment need. Always call this before offering or confirming any time.",
-    "base_url": "http://host.docker.internal:8890",
+    "function_description": "Get the FREE 30-minute appointment slots for one date, either for a specific doctor (doctor_id) or for every doctor in a department (department_id). Each slot carries an availability_id — that exact id is what book_appointment and reschedule_appointment need. Always call this before offering or confirming any time. An empty list means that day is fully booked.",
+    "base_url": "https://go.convoi.ai/hospital-demo",
     "endpoint_path": "/availability",
     "http_method": "GET",
     "parameter_schema": {
@@ -97,11 +106,11 @@
         },
         "doctor_id": {
           "type": "integer",
-          "description": "Check one specific doctor's slots (from get_doctors)."
+          "description": "Check one specific doctor's slots (doctor_id from get_doctors)."
         },
         "department_id": {
           "type": "integer",
-          "description": "Check all doctors of one department/branch (from get_departments). Use when the caller has no doctor preference."
+          "description": "Check all doctors of one department and branch (department_id from get_departments). Use this when the caller has no doctor preference."
         }
       },
       "required": ["date"]
@@ -109,13 +118,15 @@
     "response_mapping": {
       "date": "date",
       "free_slots": "results"
-    }
+    },
+    "active": true
   },
   {
-    "active": true,
+    "name": "Book Appointment",
+    "description": "Books a free slot in the hospital ERP and returns the booking number (Magrabi demo).",
     "function_name": "book_appointment",
-    "description": "Book an appointment in the hospital ERP by reserving one free slot. Pass the availability_id of the slot the caller picked (from check_availability this call). For a returning patient pass their patient_id (from get_patient_details); for a new patient pass patient_name and phone instead and they are registered automatically. Returns appointment_id and the confirmed doctor/branch/time.",
-    "base_url": "http://host.docker.internal:8890",
+    "function_description": "Book an appointment in the hospital ERP by reserving one free slot. Pass the availability_id of the slot the caller picked (from check_availability in THIS call). For a returning patient pass their patient_id from get_patient_details; for a new patient pass patient_name and phone instead (plus national_id, dob and gender when Yaqeen verified them) and the patient is registered automatically with a new medical record number. Returns the booking_number to read to the caller, plus the confirmed doctor, branch and time. If the slot was taken in the meantime the call fails with HTTP 409 — re-check availability and offer another time.",
+    "base_url": "https://go.convoi.ai/hospital-demo",
     "endpoint_path": "/appointments",
     "http_method": "POST",
     "request_template": {
@@ -141,7 +152,7 @@
         },
         "patient_name": {
           "type": "string",
-          "description": "The patient's full name. Required when patient_id is not passed (new patient). For a Yaqeen-verified patient, use the verified full_name."
+          "description": "The patient's full name. Required when patient_id is not passed (new patient). For a Yaqeen-verified patient use the verified full name."
         },
         "phone": {
           "type": "string",
@@ -149,15 +160,15 @@
         },
         "national_id": {
           "type": "string",
-          "description": "New patients only: the National ID / Iqama number (from yaqeen_verify or as given by the caller)."
+          "description": "New patients only: the National ID or Iqama number, if the caller gave one."
         },
         "dob": {
           "type": "string",
-          "description": "New patients only: date of birth YYYY-MM-DD (from yaqeen_verify or the caller)."
+          "description": "New patients only: date of birth in YYYY-MM-DD format, if known."
         },
         "gender": {
           "type": "string",
-          "description": "New patients only: gender, if known (from yaqeen_verify)."
+          "description": "New patients only: gender, if Yaqeen returned it."
         },
         "reason": {
           "type": "string",
@@ -165,13 +176,19 @@
         }
       },
       "required": ["availability_id", "reason"]
-    }
+    },
+    "error_mapping": {
+      "409": "That slot was just taken by someone else. Re-run check_availability for the same day and offer the caller a different time.",
+      "400": "The booking details were incomplete. For a returning patient pass patient_id; for a new patient pass patient_name and phone."
+    },
+    "active": true
   },
   {
-    "active": true,
+    "name": "Find Appointments",
+    "description": "Finds a patient's scheduled appointments by phone number (Magrabi demo).",
     "function_name": "find_appointments",
-    "description": "Find a patient's SCHEDULED appointments by phone number. This is the ONLY source of an appointment_id for reschedule_appointment / cancel_appointment. Returns appointment_id, patient name, doctor, department, branch, date/time and reason for each match.",
-    "base_url": "http://host.docker.internal:8890",
+    "function_description": "Find a patient's SCHEDULED appointments by phone number. This is the ONLY source of an appointment_id for reschedule_appointment and cancel_appointment. Returns appointment_id, booking_number, patient name, doctor, department, branch, date and time, and reason for each match. An empty result means nothing is booked under that number — ask whether it could be under a different number before giving up.",
+    "base_url": "https://go.convoi.ai/hospital-demo",
     "endpoint_path": "/appointments?phone={phone_number}",
     "http_method": "GET",
     "parameter_schema": {
@@ -186,13 +203,15 @@
     },
     "response_mapping": {
       "appointments": "results"
-    }
+    },
+    "active": true
   },
   {
-    "active": true,
+    "name": "Reschedule Appointment",
+    "description": "Atomically moves an existing appointment to a new slot (Magrabi demo).",
     "function_name": "reschedule_appointment",
-    "description": "Atomically move an existing appointment to a new slot: reserves the new slot, frees the old one and updates the appointment in one transaction. Needs the real appointment_id from find_appointments THIS call, and the new slot's availability_id from check_availability THIS call. If it fails, the original appointment is unchanged.",
-    "base_url": "http://host.docker.internal:8890",
+    "function_description": "Atomically move an existing appointment to a new slot: it reserves the new slot, frees the old one and updates the appointment in a single transaction. Requires the real appointment_id from find_appointments in THIS call, and the new slot's availability_id from check_availability in THIS call. Never pass a guessed or placeholder id. If it fails, the original appointment is unchanged — tell the caller honestly and offer another time.",
+    "base_url": "https://go.convoi.ai/hospital-demo",
     "endpoint_path": "/appointments/reschedule",
     "http_method": "POST",
     "request_template": {
@@ -204,7 +223,7 @@
       "properties": {
         "appointment_id": {
           "type": "integer",
-          "description": "The appointment_id exactly as returned by find_appointments in THIS call. Never guess or reuse."
+          "description": "The appointment_id exactly as returned by find_appointments in THIS call. Never guess or reuse one."
         },
         "new_availability_id": {
           "type": "integer",
@@ -212,13 +231,19 @@
         }
       },
       "required": ["appointment_id", "new_availability_id"]
-    }
+    },
+    "error_mapping": {
+      "409": "The new slot was just taken, or the appointment is no longer active. The original appointment still stands — re-check availability and offer another time.",
+      "404": "No appointment exists with that id. Re-run find_appointments to get the correct appointment_id."
+    },
+    "active": true
   },
   {
-    "active": true,
+    "name": "Cancel Appointment",
+    "description": "Cancels an appointment and frees its slot (Magrabi demo).",
     "function_name": "cancel_appointment",
-    "description": "Cancel an existing appointment (marks it CANCELLED and frees its slot). Needs the real appointment_id from find_appointments THIS call. Use only after the caller explicitly confirms the cancellation.",
-    "base_url": "http://host.docker.internal:8890",
+    "function_description": "Cancel an existing appointment: it is marked cancelled and its slot is released for other patients. Requires the real appointment_id from find_appointments in THIS call — never guess or build one. Only call this after the caller has explicitly confirmed the cancellation.",
+    "base_url": "https://go.convoi.ai/hospital-demo",
     "endpoint_path": "/appointments/cancel",
     "http_method": "POST",
     "request_template": {
@@ -233,6 +258,11 @@
         }
       },
       "required": ["appointment_id"]
-    }
+    },
+    "error_mapping": {
+      "404": "No appointment exists with that id. Re-run find_appointments to get the correct appointment_id.",
+      "409": "That appointment is already cancelled."
+    },
+    "active": true
   }
 ]
