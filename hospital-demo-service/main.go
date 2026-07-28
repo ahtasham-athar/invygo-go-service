@@ -295,6 +295,7 @@ func GetDoctorsHandler(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusInternalServerError, fmt.Sprintf("Error scanning row: %v", err))
 			return
 		}
+		d.Name = stripDr(d.Name)
 		d.Specialty = specialty.String
 		doctors = append(doctors, d)
 	}
@@ -358,6 +359,7 @@ func GetAvailabilityHandler(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusInternalServerError, fmt.Sprintf("Error scanning row: %v", err))
 			return
 		}
+		s.DoctorName = stripDr(s.DoctorName)
 		s.StartTime = start.Format(timeLayout)
 		s.EndTime = end.Format(timeLayout)
 		slots = append(slots, s)
@@ -392,18 +394,35 @@ func resolvePatient(tx *sql.Tx, req BookAppointmentRequest) (int, string, string
 	var id int
 	var foundName string
 	var mrn sql.NullString
-	err := tx.QueryRow(
-		`SELECT patient_id, name, mrn FROM patients
-		 WHERE SUBSTR(REGEXP_REPLACE(phone, '[^0-9]', ''), -LENGTH(:1)) = :1`, key).Scan(&id, &foundName, &mrn)
-	if err == nil {
-		return id, foundName, mrn.String, nil
-	}
-	if err != sql.ErrNoRows {
-		return 0, "", "", err
-	}
 
-	// New patient — need a name to register them.
-	if req.PatientName == "" {
+	if req.PatientName != "" {
+		// A name was supplied: match phone AND name, so a corrected name or a
+		// family member on a shared phone gets their own record instead of
+		// silently reusing whoever registered the number first.
+		err := tx.QueryRow(
+			`SELECT patient_id, name, mrn FROM patients
+			 WHERE SUBSTR(REGEXP_REPLACE(phone, '[^0-9]', ''), -LENGTH(:1)) = :1
+			   AND UPPER(name) = UPPER(:2)
+			 ORDER BY patient_id DESC FETCH FIRST 1 ROWS ONLY`, key, req.PatientName).Scan(&id, &foundName, &mrn)
+		if err == nil {
+			return id, foundName, mrn.String, nil
+		}
+		if err != sql.ErrNoRows {
+			return 0, "", "", err
+		}
+		// No record under this phone+name — fall through and register them.
+	} else {
+		err := tx.QueryRow(
+			`SELECT patient_id, name, mrn FROM patients
+			 WHERE SUBSTR(REGEXP_REPLACE(phone, '[^0-9]', ''), -LENGTH(:1)) = :1
+			 ORDER BY patient_id DESC FETCH FIRST 1 ROWS ONLY`, key).Scan(&id, &foundName, &mrn)
+		if err == nil {
+			return id, foundName, mrn.String, nil
+		}
+		if err != sql.ErrNoRows {
+			return 0, "", "", err
+		}
+		// New patient — need a name to register them.
 		return 0, "", "", fmt.Errorf("no patient found for this phone; provide patient_name to register them")
 	}
 	var dobVal interface{}
@@ -420,7 +439,9 @@ func resolvePatient(tx *sql.Tx, req BookAppointmentRequest) (int, string, string
 	}
 	if err := tx.QueryRow(
 		`SELECT patient_id, name FROM patients
-		 WHERE SUBSTR(REGEXP_REPLACE(phone, '[^0-9]', ''), -LENGTH(:1)) = :1`, key).Scan(&id, &foundName); err != nil {
+		 WHERE SUBSTR(REGEXP_REPLACE(phone, '[^0-9]', ''), -LENGTH(:1)) = :1
+		   AND UPPER(name) = UPPER(:2)
+		 ORDER BY patient_id DESC FETCH FIRST 1 ROWS ONLY`, key, req.PatientName).Scan(&id, &foundName); err != nil {
 		return 0, "", "", fmt.Errorf("failed to read back new patient: %v", err)
 	}
 	// Generate the medical record number from the new patient id.
@@ -436,6 +457,18 @@ func nullIfEmpty(s string) interface{} {
 		return nil
 	}
 	return s
+}
+
+// stripDr removes the "Dr. " prefix from a doctor name before it goes out in
+// an API response. The voice agent's English TTS reads the abbreviation as
+// "drive", so the agent gets the bare name and says "Doctor <name>" itself.
+func stripDr(name string) string {
+	for _, p := range []string{"Dr. ", "Dr.", "Dr "} {
+		if len(name) > len(p) && name[:len(p)] == p {
+			return name[len(p):]
+		}
+	}
+	return name
 }
 
 // BookAppointmentHandler books a free availability slot.
@@ -518,7 +551,7 @@ func BookAppointmentHandler(w http.ResponseWriter, r *http.Request) {
 		"patient_id":     patientID,
 		"patient_name":   patientName,
 		"mrn":            patientMRN,
-		"doctor_name":    doctorName,
+		"doctor_name":    stripDr(doctorName),
 		"department":     deptName,
 		"branch":         branch,
 		"start_time":     start.Format(timeLayout),
@@ -603,7 +636,7 @@ func ListAppointmentsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		a.BookingNumber = fmt.Sprintf("BK-%d", 1000+a.AppointmentID)
-		a.DoctorName = doctorName.String
+		a.DoctorName = stripDr(doctorName.String)
 		a.Department = deptName.String
 		a.Branch = branch.String
 		a.Reason = reason.String
@@ -704,7 +737,7 @@ func RescheduleAppointmentHandler(w http.ResponseWriter, r *http.Request) {
 		"message":        "Appointment rescheduled successfully.",
 		"appointment_id": req.AppointmentID,
 		"booking_number": fmt.Sprintf("BK-%d", 1000+req.AppointmentID),
-		"doctor_name":    doctorName,
+		"doctor_name":    stripDr(doctorName),
 		"department":     deptName,
 		"branch":         branch,
 		"start_time":     start.Format(timeLayout),

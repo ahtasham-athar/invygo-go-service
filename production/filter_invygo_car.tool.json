@@ -1,56 +1,50 @@
 {
-  "name": "filter_invygo_car (PRODUCTION)",
+  "name": "filter_cars (PRODUCTION)",
   "description": "Searches the live Invygo fleet across Subscribe-to-Own, Monthly, and Short-Term (daily/weekly) plans by city (mandatory), plan, brand/model, budget, body type, color and condition. Returns matching cars plus a status the agent uses to decide how to respond.",
-  "function_name": "filter_invygo_car",
-  "function_description": "Search the Invygo car inventory. Always pass the user's city (mandatory) and the plan you handle (product). Optionally pass a specific brand/model (query), the user's budget (max_price), body_type, color, or condition. Use 'tier' ONLY for explicit luxury/segment requests. The response includes a 'status' field, a 'results' array, and helpful hints (e.g. also_in_cities, also_in_products, price_min/price_max).",
+  "function_name": "filter_cars",
+  "function_description": "Search the Invygo car inventory. Always pass the user's city (mandatory) and the plan you handle (product). Optionally pass a specific brand/model (query), the user's budget (max_price), body_type, color, or condition. Use min_price for a price floor and min_year for 'year-or-newer'. The response includes a 'status' field, a 'results' array, and hints (also_in_cities, also_in_products, price_min/price_max). QUERY DISCIPLINE: 'query' must be a car name you POSITIVELY recognized from the customer — a real brand/model, or a known Saudi spoken form of one (e.g. 'Antra' / 'al-Antra' = Elantra, 'Sni' = Sunny, 'Kamry' = Camry). If the customer's word is ambiguous between several names, or is not recognizable as any car name, DO NOT call this tool yet — ask them which car they mean first. Never fill 'query' with a guess, a translation of their word, or an invented name, and never run a broad no-query search to cover an unrecognized word. Availability questions are answered ONLY from this tool's results, never from memory.",
   "parameter_schema": {
     "type": "object",
     "required": ["city"],
     "properties": {
       "city": {
         "type": "string",
-        "enum": ["Riyadh", "Jeddah", "Dammam", "Al Khobar", "Madinah", "Mecca", "Taif", "Arar", "Turayf"],
-        "description": "The pickup/service city. MANDATORY. Must be one of the listed cities."
-      },
-      "product": {
-        "type": "string",
-        "enum": ["STO", "MONTHLY", "STS", ""],
-        "description": "The subscription plan to search: STO (Subscribe to Own), MONTHLY (monthly subscription), or STS (short-term daily/weekly rental). Send the plan THIS agent handles."
-      },
-      "query": {
-        "type": "string",
-        "description": "A specific brand or model ONLY (e.g. 'Toyota', 'Yaris', 'Camry'). Do NOT put body types ('SUV','Sedan'), tiers, or colors here."
-      },
-      "max_price": {
-        "type": "number",
-        "description": "The user's budget in Saudi Riyals. Monthly amount for STO/MONTHLY; weekly amount for STS (optional for STS)."
-      },
-      "min_price": {
-        "type": "number",
-        "description": "Optional LOWER price bound for a range request (e.g. 'between 1500 and 2500' -> min_price 1500). Same basis as max_price. Leave empty unless the user gives a floor."
-      },
-      "min_year": {
-        "type": "number",
-        "description": "Optional minimum model year (e.g. '2024 or newer' -> 2024). Cars older than this are excluded. Leave empty unless the user asks for a minimum year."
-      },
-      "body_type": {
-        "type": "string",
-        "enum": ["Sedan", "SUV", "Crossover", "CUV", "Hatchback", "Minivan", "Pickup", "Van", ""],
-        "description": "Physical body shape. Infer from the model when possible (e.g. Yaris->Sedan, Creta->SUV, Hilux->Pickup). Used for recommendations/alternatives."
-      },
-      "tier": {
-        "type": "string",
-        "enum": ["Entry level Sedan", "Midsize Sedan", "Entry level SUV", "Midsize SUV", "Luxury Sedan", "Luxury SUV", "Luxury Hatchback", "Luxury MPV", "Subcompact Hatchback", "Pickup Truck", "Luxury", ""],
-        "description": "ONLY for explicit segment/luxury requests. Use a specific tier (e.g. 'Midsize Sedan', 'Luxury SUV') or the generic 'Luxury' for any luxury car. Leave empty for normal searches and for alternative recommendations."
+        "description": "The pickup/service city the customer named (e.g. Riyadh, Jeddah, Abha). The search service normalizes Arabic/English and spelling variants; an unknown city returns the served-cities list."
       },
       "color": {
         "type": "string",
         "description": "A specific color preference (e.g. 'White', 'Black')."
       },
-      "condition": {
+      "query": {
         "type": "string",
+        "description": "A specific brand or model ONLY (e.g. 'Toyota', 'Yaris', 'Camry'). Do NOT put body types ('SUV','Sedan'), tiers, or colors here. Must be a name you positively recognized from the customer; if their word is ambiguous or unrecognizable, ask them which car they mean instead of calling this tool."
+      },
+      "product": {
+        "enum": ["STO", "MONTHLY", "STS", ""],
+        "type": "string",
+        "description": "The subscription plan to search: STO (Subscribe to Own), MONTHLY (monthly subscription), or STS (short-term daily/weekly rental). Send the plan THIS agent handles."
+      },
+      "min_year": {
+        "type": ["integer", "null"],
+        "description": "Minimum model year, e.g. '2024 or newer'. Only set if the customer asks for a year-or-newer; never put a year in query."
+      },
+      "body_type": {
+        "enum": ["Sedan", "SUV", "Crossover", "CUV", "Hatchback", "Minivan", "Pickup", "Van", ""],
+        "type": "string",
+        "description": "Physical body shape. Infer from the model when possible (e.g. Yaris->Sedan, Creta->SUV, Hilux->Pickup). Used for recommendations/alternatives."
+      },
+      "condition": {
         "enum": ["NEW", "USED", ""],
+        "type": "string",
         "description": "Only set if the user explicitly asks for a New or Used car."
+      },
+      "max_price": {
+        "type": ["number", "null"],
+        "description": "The user's budget in Saudi Riyals. Monthly amount for STO/MONTHLY; weekly amount for STS (optional for STS)."
+      },
+      "min_price": {
+        "type": ["number", "null"],
+        "description": "Lower price bound in Saudi Riyals — a floor (e.g. 'cheapest but not under 1000'). Monthly for STO/MONTHLY; weekly for STS. Only set if the customer states a minimum."
       }
     }
   },
@@ -63,20 +57,21 @@
   },
   "request_template": {
     "city": "${city}",
-    "product": "${product}",
+    "color": "${color}",
     "query": "${query}",
-    "max_price": "${max_price}",
-    "min_price": "${min_price}",
+    "product": "${product}",
     "min_year": "${min_year}",
     "body_type": "${body_type}",
-    "tier": "${tier}",
-    "color": "${color}",
-    "condition": "${condition}"
+    "condition": "${condition}",
+    "max_price": "${max_price}",
+    "min_price": "${min_price}"
   },
   "auth_required": true,
   "auth_type": "none",
   "response_mapping": {},
   "error_mapping": {},
   "active": true,
-  "is_public": false
+  "is_public": false,
+  "_mirror_of_platform_tool_id": "31258fb5-fc84-4993-ba48-407857776437",
+  "_mirror_note": "Local mirror of the LIVE platform tool config (as pasted 2026-07-24) + the QUERY DISCIPLINE addition in function_description and the query param description. Paste those two fields into the platform config to deploy."
 }
