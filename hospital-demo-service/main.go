@@ -401,9 +401,9 @@ func resolvePatient(tx *sql.Tx, req BookAppointmentRequest) (int, string, string
 		// silently reusing whoever registered the number first.
 		err := tx.QueryRow(
 			`SELECT patient_id, name, mrn FROM patients
-			 WHERE SUBSTR(REGEXP_REPLACE(phone, '[^0-9]', ''), -LENGTH(:1)) = :1
-			   AND UPPER(name) = UPPER(:2)
-			 ORDER BY patient_id DESC FETCH FIRST 1 ROWS ONLY`, key, req.PatientName).Scan(&id, &foundName, &mrn)
+			 WHERE SUBSTR(REGEXP_REPLACE(phone, '[^0-9]', ''), -LENGTH(:1)) = :2
+			   AND UPPER(name) = UPPER(:3)
+			 ORDER BY patient_id DESC FETCH FIRST 1 ROWS ONLY`, key, key, req.PatientName).Scan(&id, &foundName, &mrn)
 		if err == nil {
 			return id, foundName, mrn.String, nil
 		}
@@ -454,9 +454,9 @@ func resolvePatient(tx *sql.Tx, req BookAppointmentRequest) (int, string, string
 	}
 	if err := tx.QueryRow(
 		`SELECT patient_id, name FROM patients
-		 WHERE SUBSTR(REGEXP_REPLACE(phone, '[^0-9]', ''), -LENGTH(:1)) = :1
-		   AND UPPER(name) = UPPER(:2)
-		 ORDER BY patient_id DESC FETCH FIRST 1 ROWS ONLY`, key, req.PatientName).Scan(&id, &foundName); err != nil {
+		 WHERE SUBSTR(REGEXP_REPLACE(phone, '[^0-9]', ''), -LENGTH(:1)) = :2
+		   AND UPPER(name) = UPPER(:3)
+		 ORDER BY patient_id DESC FETCH FIRST 1 ROWS ONLY`, key, key, req.PatientName).Scan(&id, &foundName); err != nil {
 		return 0, "", "", fmt.Errorf("failed to read back new patient: %v", err)
 	}
 	// Generate the medical record number from the new patient id.
