@@ -425,16 +425,31 @@ func resolvePatient(tx *sql.Tx, req BookAppointmentRequest) (int, string, string
 		// New patient — need a name to register them.
 		return 0, "", "", fmt.Errorf("no patient found for this phone; provide patient_name to register them")
 	}
-	var dobVal interface{}
+	// Build the INSERT from the provided fields only — go-ora rejects untyped
+	// nil binds (ORA-01008), so omitted columns are simply left to default NULL.
+	cols := "name, phone"
+	placeholders := ":1, :2"
+	args := []interface{}{req.PatientName, req.Phone}
+	if req.NationalID != "" {
+		args = append(args, req.NationalID)
+		cols += ", national_id"
+		placeholders += fmt.Sprintf(", :%d", len(args))
+	}
+	if req.Gender != "" {
+		args = append(args, req.Gender)
+		cols += ", gender"
+		placeholders += fmt.Sprintf(", :%d", len(args))
+	}
 	if req.DOB != "" {
 		if d, derr := time.Parse("2006-01-02", req.DOB); derr == nil {
-			dobVal = d
+			args = append(args, d)
+			cols += ", dob"
+			placeholders += fmt.Sprintf(", :%d", len(args))
 		}
 	}
 	if _, err := tx.Exec(
-		`INSERT INTO patients (name, phone, national_id, gender, dob)
-		 VALUES (:1, :2, :3, :4, :5)`,
-		req.PatientName, req.Phone, nullIfEmpty(req.NationalID), nullIfEmpty(req.Gender), dobVal); err != nil {
+		fmt.Sprintf(`INSERT INTO patients (%s) VALUES (%s)`, cols, placeholders),
+		args...); err != nil {
 		return 0, "", "", fmt.Errorf("failed to create patient: %v", err)
 	}
 	if err := tx.QueryRow(
@@ -450,13 +465,6 @@ func resolvePatient(tx *sql.Tx, req BookAppointmentRequest) (int, string, string
 		return 0, "", "", fmt.Errorf("failed to assign MRN: %v", err)
 	}
 	return id, foundName, newMRN, nil
-}
-
-func nullIfEmpty(s string) interface{} {
-	if s == "" {
-		return nil
-	}
-	return s
 }
 
 // stripDr removes the "Dr. " prefix from a doctor name before it goes out in
