@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	_ "github.com/sijms/go-ora/v2"
@@ -814,6 +815,94 @@ func CancelAppointmentHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+type UpdatePatientRequest struct {
+	PatientID  int    `json:"patient_id"`
+	Name       string `json:"name"`
+	Phone      string `json:"phone"`
+	NationalID string `json:"national_id"`
+	DOB        string `json:"dob"`
+	Gender     string `json:"gender"`
+}
+
+// UpdatePatientHandler corrects fields on an existing patient record (like the
+// HMIS "update demographics" flow). Appointments reference patient_id, so a
+// corrected name shows up immediately in every appointment lookup.
+// PATCH /patients {patient_id, name?, phone?, national_id?, dob?, gender?}
+func UpdatePatientHandler(w http.ResponseWriter, r *http.Request) {
+	var req UpdatePatientRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	if req.PatientID <= 0 {
+		writeError(w, http.StatusBadRequest, "patient_id is required (from get_patient_details or find_appointments in this call)")
+		return
+	}
+
+	// Build the UPDATE from the provided fields only (same rule as the patient
+	// INSERT — go-ora rejects untyped nil binds).
+	sets := []string{}
+	args := []interface{}{}
+	addSet := func(col string, val interface{}) {
+		args = append(args, val)
+		sets = append(sets, fmt.Sprintf("%s = :%d", col, len(args)))
+	}
+	if req.Name != "" {
+		addSet("name", req.Name)
+	}
+	if req.Phone != "" {
+		addSet("phone", req.Phone)
+	}
+	if req.NationalID != "" {
+		addSet("national_id", req.NationalID)
+	}
+	if req.Gender != "" {
+		addSet("gender", req.Gender)
+	}
+	if req.DOB != "" {
+		d, derr := time.Parse("2006-01-02", req.DOB)
+		if derr != nil {
+			writeError(w, http.StatusBadRequest, "Invalid dob format. Use YYYY-MM-DD")
+			return
+		}
+		addSet("dob", d)
+	}
+	if len(sets) == 0 {
+		writeError(w, http.StatusBadRequest, "Provide at least one field to update (name, phone, national_id, gender, dob)")
+		return
+	}
+
+	args = append(args, req.PatientID)
+	res, err := db.Exec(
+		fmt.Sprintf(`UPDATE patients SET %s WHERE patient_id = :%d`, strings.Join(sets, ", "), len(args)),
+		args...)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, fmt.Sprintf("Database error: %v", err))
+		return
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		writeError(w, http.StatusNotFound, "No patient exists with that patient_id")
+		return
+	}
+
+	var name, phone string
+	var mrn sql.NullString
+	if err := db.QueryRow(
+		`SELECT name, phone, mrn FROM patients WHERE patient_id = :1`, req.PatientID).
+		Scan(&name, &phone, &mrn); err != nil {
+		writeError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to read back patient: %v", err))
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"status":     "success",
+		"message":    "Patient record updated.",
+		"patient_id": req.PatientID,
+		"name":       name,
+		"phone":      phone,
+		"mrn":        mrn.String,
+	})
+}
+
 func main() {
 	log.Println("Starting Hospital Demo Service...")
 
@@ -821,6 +910,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /patients", GetPatientsHandler)
+	mux.HandleFunc("PATCH /patients", UpdatePatientHandler)
 	mux.HandleFunc("GET /yaqeen", YaqeenVerifyHandler)
 	mux.HandleFunc("GET /departments", GetDepartmentsHandler)
 	mux.HandleFunc("GET /doctors", GetDoctorsHandler)

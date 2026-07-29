@@ -23,6 +23,53 @@
     "active": true
   },
   {
+    "name": "Update Patient Record",
+    "description": "Corrects fields (name spelling, phone, DOB) on an existing patient record in the hospital ERP (Magrabi demo).",
+    "function_name": "update_patient",
+    "function_description": "Correct the details on an EXISTING patient record — name spelling, phone number, date of birth or gender. Requires the patient_id from get_patient_details or find_appointments in THIS call, and only for a record the caller has confirmed is theirs. Use when the caller says their details are wrong or asks to correct the record (e.g. a misspelled name). The corrected name appears immediately in all appointment lookups. NEVER use this to change a record to a different person — someone new on this phone is a new patient, not an update.",
+    "base_url": "https://go.convoi.ai/hospital-demo",
+    "endpoint_path": "/patients",
+    "http_method": "PATCH",
+    "request_template": {
+      "patient_id": "${patient_id}",
+      "name": "${name}",
+      "phone": "${phone}",
+      "dob": "${dob}",
+      "gender": "${gender}"
+    },
+    "parameter_schema": {
+      "type": "object",
+      "properties": {
+        "patient_id": {
+          "type": "integer",
+          "description": "The patient's id, exactly as returned by get_patient_details or find_appointments in THIS call. Never guess it."
+        },
+        "name": {
+          "type": "string",
+          "description": "The corrected full name, only if the name is being fixed (apply the caller's spelling)."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The corrected phone number as digits, only if the phone is being changed on the record."
+        },
+        "dob": {
+          "type": "string",
+          "description": "The corrected date of birth in YYYY-MM-DD, only if being fixed."
+        },
+        "gender": {
+          "type": "string",
+          "description": "The corrected gender, only if being fixed."
+        }
+      },
+      "required": ["patient_id"]
+    },
+    "error_mapping": {
+      "404": "No patient record exists with that patient_id. Re-run get_patient_details to get the correct id.",
+      "400": "The update was incomplete — pass patient_id plus at least one field to change."
+    },
+    "active": true
+  },
+  {
     "name": "Yaqeen Identity Verification",
     "description": "Verifies a new patient's National ID / Iqama against the national registry (Magrabi demo, mocked).",
     "function_name": "yaqeen_verify",
